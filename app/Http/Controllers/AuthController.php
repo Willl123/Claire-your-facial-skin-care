@@ -41,30 +41,46 @@ class AuthController extends Controller
         return redirect('/login');
     }
     
+       
         public function authenticate(Request $request)
-    {
-        $credentials = $request->only(
-            'email',
-            'password'
-        );
-
-        if(Auth::attempt($credentials))
         {
-            $request->session()->regenerate();
+            $credentials = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
+            ]);
 
-            if(Auth::user()->role == 'admin')
-            {
-                return redirect('/admin');
+            if (Auth::attempt($credentials)) {
+
+                $request->session()->regenerate();
+
+                $role = Auth::user()->role;
+
+                if ($role == 'admin') {
+                    return redirect('/admin');
+                }
+
+                if ($role == 'customer') {
+                    return redirect('/dashboard');
+                }
+
+                if ($role == 'therapist') {
+                    return redirect('/therapist');
+                }
+
+                Auth::logout();
+
+                return redirect('/login')->with(
+                    'error',
+                    'Role akun tidak dikenali.'
+                );
             }
 
-            return redirect('/dashboard');
+            return back()->with(
+                'error',
+                'Email atau Password salah'
+            );
         }
 
-        return back()->with(
-            'error',
-            'Email atau Password salah'
-        );
-    }
 
 
     public function logout(Request $request)

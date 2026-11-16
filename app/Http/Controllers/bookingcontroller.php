@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+
 
 class BookingController extends Controller
 {
@@ -91,30 +93,52 @@ class BookingController extends Controller
     }
 
 
-    public function notifications()
-    {
-    $bookings = Booking::where('user_id', auth::id())
+    
+public function notifications()
+{
+    $bookings = Booking::where('user_id', Auth::id())
         ->where('is_hidden', false)
         ->latest()
         ->get();
 
     return view('notifications', compact('bookings'));
-    }
+}
+
+public function hide($id)
+{
+    $booking = Booking::where('id', $id)
+        ->where('user_id', Auth::id())
+        ->firstOrFail();
+
+    $booking->update([
+        'is_hidden' => true
+    ]);
+
+    return back()->with('success', 'Notifikasi berhasil disembunyikan.');
+}
+
     
-    public function hide($id)
+
+
+            // ADMIN: ASSIGN THERAPIST
+    public function assignTherapist(Request $request, $id)
     {
-        $booking = Booking::where('id', $id)
-            ->where('user_id', auth::id())
+        $request->validate([
+            'therapist_id' => 'required|exists:users,id',
+        ]);
+
+        // Pastikan akun yang dipilih benar-benar terapis
+        $therapist = User::where('id', $request->therapist_id)
+            ->where('role', 'therapist')
             ->firstOrFail();
 
-        $booking->update(['is_hidden' => 1]);
+        $booking = Booking::findOrFail($id);
 
-        return back();
+        $booking->therapist_id = $therapist->id;
+        $booking->save();
+
+        return back()->with('success', 'Terapis berhasil ditugaskan.');
     }
-    
-
-
-
 
 
 

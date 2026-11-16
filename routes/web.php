@@ -1,16 +1,14 @@
-
-
 <?php
 
 use Illuminate\Support\Facades\Route;
-
 use App\Models\Booking;
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\TherapistController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,43 +28,20 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Auth
+| Authentication
 |--------------------------------------------------------------------------
 */
 
-Route::get('/login', [AuthController::class, 'login'])
-    ->name('login');
+Route::middleware('guest')->group(function () {
 
-Route::post('/login', [AuthController::class, 'authenticate']);
+    Route::get('/login', [AuthController::class, 'login'])
+        ->name('login');
 
-Route::get('/register', [AuthController::class, 'showRegister']);
+    Route::post('/login', [AuthController::class, 'authenticate']);
 
-Route::post('/register', [AuthController::class, 'register']);
+    Route::get('/register', [AuthController::class, 'showRegister']);
 
-/*
-|--------------------------------------------------------------------------
-| Customer
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/dashboard', [DashboardController::class, 'index']);
-
-Route::get('/profile', [CustomerController::class, 'profile'])
-    ->name('profile');
-
-/*
-|--------------------------------------------------------------------------
-| Booking
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware('auth')->group(function () {
-
-    Route::get('/booking', function () {
-        return view('booking');
-    });
-
-    Route::post('/booking/store', [BookingController::class, 'store']);
+    Route::post('/register', [AuthController::class, 'register']);
 
 });
 
@@ -76,33 +51,52 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::get('/admin', [AdminController::class, 'index']);
+Route::middleware(['auth', 'role:admin'])->group(function () {
 
-Route::get('/booking/{id}/approve', [BookingController::class, 'approve']);
+    Route::get('/admin', [AdminController::class, 'index']);
 
-Route::get('/booking/{id}/reject', [BookingController::class, 'reject']);
+    Route::get('/booking/{id}/approve', [BookingController::class, 'approve']);
 
-Route::get('/booking/{id}/complete', [BookingController::class, 'complete']);
+    Route::get('/booking/{id}/reject', [BookingController::class, 'reject']);
 
-/*
-|--------------------------------------------------------------------------
-| Notifications
-|--------------------------------------------------------------------------
-*/
+    Route::get('/booking/{id}/complete', [BookingController::class, 'complete']);
 
-Route::get('/notifications', [BookingController::class, 'notifications']);
+    Route::get('/notifications', [BookingController::class, 'notifications']);
 
-Route::post('/notifications/{id}/hide', [BookingController::class, 'hide'])
-    ->name('notifications.hide');
+    Route::post('/notifications/{id}/hide', [BookingController::class, 'hide'])
+        ->name('notifications.hide');
+
+});
 
 /*
 |--------------------------------------------------------------------------
-| Profile
+| Customer
 |--------------------------------------------------------------------------
 */
 
-Route::post('/profile/photo', [CustomerController::class, 'uploadPhoto'])
-    ->name('profile.photo');
+Route::middleware(['auth', 'role:customer'])->group(function () {
+
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+
+    Route::get('/profile', [CustomerController::class, 'profile'])
+        ->name('profile');
+
+    Route::get('/booking', function () {
+        return view('booking');
+    });
+
+    Route::post('/booking/store', [BookingController::class, 'store']);
+
+    Route::post('/profile/photo', [CustomerController::class, 'uploadPhoto'])
+        ->name('profile.photo');
+
+          Route::get('/notifications', [BookingController::class, 'notifications'])
+        ->name('notifications');
+
+    Route::post('/notifications/{id}/hide', [BookingController::class, 'hide'])
+        ->name('notifications.hide');
+
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -111,128 +105,22 @@ Route::post('/profile/photo', [CustomerController::class, 'uploadPhoto'])
 */
 
 Route::post('/logout', [AuthController::class, 'logout'])
+    ->middleware('auth')
     ->name('logout');
 
 
-// use Illuminate\Support\Facades\Route;
-// use App\Http\Controllers\AuthController;
+    /*
+|--------------------------------------------------------------------------
+| Therapist
+|--------------------------------------------------------------------------
+*/
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+Route::middleware(['auth', 'role:therapist'])->group(function () {
 
-// /*
-// |--------------------------------------------------------------------------
-// | Auth
-// |--------------------------------------------------------------------------
-// */
+    Route::get('/therapist', [TherapistController::class, 'index'])
+        ->name('therapist.dashboard');
 
-// // Route::get('/login', [AuthController::class,'login']);
+});
 
-// // Route::post('/login', [AuthController::class,'authenticate']);
-
-// Route::get('/register', [AuthController::class,'showRegister']);
-
-// Route::post('/register', [AuthController::class,'register']);
-
-// /*
-// |--------------------------------------------------------------------------
-// | Customer
-// |--------------------------------------------------------------------------
-// */
-
-// // Route::get('/dashboard', function () {
-
-// //     return view('welcome');
-
-// // });
-
-// use App\Http\Controllers\DashboardController;
-
-// Route::get('/dashboard', [DashboardController::class, 'index']);
-
-// /*
-// |--------------------------------------------------------------------------
-// | Admin
-// |--------------------------------------------------------------------------
-// */
-
-// use App\Http\Controllers\AdminController;
-
-// Route::get('/admin', [AdminController::class, 'index']);
-
-// /*
-// |--------------------------------------------------------------------------
-// | Booking
-// |--------------------------------------------------------------------------
-// */
-
-// Route::middleware('auth')->group(function () {
-
-//     Route::get('/booking', function () {
-//         return view('booking');
-//     });
-
-// });
-
-// Route::get('/profile', function () {
-//     return view('profile');
-// })->name('profile');
-
-// use App\Http\Controllers\CustomerController;
-
-// Route::get('/profile', [CustomerController::class, 'profile'])
-//     ->name('profile');
-
-// Route::post('/logout', [AuthController::class, 'logout'])
-//     ->name('logout');
-
-
-
-// Route::get('/login',[AuthController::class,'login'])
-// ->name('login');
-
-// Route::post('/login',
-// [AuthController::class,'authenticate']);
-
-
-
-// use App\Http\Controllers\BookingController;
-
-// Route::post(
-//     '/booking/store',
-//     [BookingController::class,'store']
-// );
-
-// Route::get(
-//     '/booking/{id}/approve',
-//     [BookingController::class,'approve']
-// );
-
-// Route::get(
-//     '/booking/{id}/reject',
-//     [BookingController::class,'reject']
-// );
-
-// Route::get(
-//     '/booking/{id}/complete',
-//     [BookingController::class,'complete']
-// );
-
-// // Route::get('/customer/dashboard', [CustomerController::class, 'dashboard']);
-// // Route::get('/customer/booking/{id}', [CustomerController::class, 'detail']);
-// // Route::get('/customer/notifications', [CustomerController::class, 'notifications']);
-
-// // Route::get('/notifications', [BookingController::class, 'notifications']);
-// // Route::post('/notifications/{id}/hide', [BookingController::class, 'hide']);
-
-
-
-// Route::get('/notifications', [BookingController::class, 'notifications']);
-
-// Route::post('/notifications/{id}/hide', [BookingController::class, 'hide'])
-//     ->name('notifications.hide');
-
-
-//     Route::post('/profile/photo', [CustomerController::class,'uploadPhoto'])
-//     ->name('profile.photo');
+Route::post('/booking/{id}/assign-therapist', [BookingController::class, 'assignTherapist'])
+    ->name('booking.assignTherapist');

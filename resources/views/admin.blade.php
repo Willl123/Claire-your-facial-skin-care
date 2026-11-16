@@ -243,27 +243,50 @@ td{
 <div class="container">
 
     <!-- SIDEBAR -->
+            
     <aside class="sidebar">
         <h2 class="logo">CLAIRE</h2>
 
         <ul>
-            <li class="active"><a href="/admin">Dashboard</a></li>
-            <li><a href="#">Treatments</a></li>
-            <li><a href="#">Bookings</a></li>
-            <li><a href="#">Customers</a></li>
-            <li><a href="#">Messages</a></li>
+            <li class="active">
+                <a href="/admin">Dashboard</a>
+            </li>
+
+            <li>
+                <a href="#">Treatments</a>
+            </li>
+
+            <li>
+                <a href="#">Bookings</a>
+            </li>
+
+            <li>
+                <a href="#">Customers</a>
+            </li>
+
+            <li>
+                <a href="#">Therapists</a>
+            </li>
+
+            <li>
+                <a href="#">Messages</a>
+            </li>
+
+            <li>
+                <a href="#">Reviews</a>
+            </li>
 
             <li>
                 <form action="{{ route('logout') }}" method="POST">
-                <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="sidebar-link logout-link">
-                    Logout
-                </button>
-            </form>
+                    @csrf
+                    <button type="submit" class="sidebar-link logout-link">
+                        Logout
+                    </button>
+                </form>
             </li>
         </ul>
     </aside>
+
 
     <!-- MAIN -->
     <main class="main">
@@ -310,7 +333,7 @@ td{
                     <th>Time</th>
 
                     <!-- ✅ TAMBAHAN GENDER -->
-
+                    <th>Terapis</th>
                     <th>Treatment Location</th>
                     <th>Notes</th>
                     <th>Status</th>
@@ -343,68 +366,89 @@ td{
                         @endif
                     </td>
 
-                    <td>
+                        <td>
+                        <form action="{{ route('booking.assignTherapist', $booking->id) }}" method="POST">
+                            @csrf
 
-@if($booking->status == 'pending')
+                            <select name="therapist_id" required>
+                                <option value="">Pilih Terapis</option>
 
-    <a href="/booking/{{ $booking->id }}/approve"
-       class="btn btn-approve">
-        Approve
-    </a>
+                                @foreach($therapists as $therapist)
+                                    <option value="{{ $therapist->id }}"
+                                        {{ $booking->therapist_id == $therapist->id ? 'selected' : '' }}>
+                                        {{ $therapist->name }}
+                                    </option>
+                                @endforeach
+                            </select>
 
-    <a href="/booking/{{ $booking->id }}/reject"
-       class="btn btn-reject">
-        Reject
-    </a>
+                            <button type="submit" class="btn btn-approve">
+                                Simpan
+                            </button>
+                        </form>
+                    </td>
 
-@elseif($booking->status == 'approved')
+                <td>
 
-    <a href="/booking/{{ $booking->id }}/complete"
-       class="btn btn-complete">
-        Complete
-    </a>
+                @if($booking->status == 'pending')
 
-@elseif($booking->status == 'completed')
+                    <a href="/booking/{{ $booking->id }}/approve"
+                    class="btn btn-approve">
+                        Approve
+                    </a>
 
-    <span style="color:blue;font-weight:600;">
-        Completed ✔
-    </span>
+                    <a href="/booking/{{ $booking->id }}/reject"
+                    class="btn btn-reject">
+                        Reject
+                    </a>
 
-@elseif($booking->status == 'rejected')
+                @elseif($booking->status == 'approved')
 
-    <span style="color:red;font-weight:600;">
-        Rejected ✖
-    </span>
+                    <a href="/booking/{{ $booking->id }}/complete"
+                    class="btn btn-complete">
+                        Complete
+                    </a>
 
-@endif
+                @elseif($booking->status == 'completed')
 
-</td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="10">Belum ada booking</td>
-                </tr>
-                @endforelse
-            </table>
-        </section>
+                    <span style="color:blue;font-weight:600;">
+                        Completed ✔
+                    </span>
 
-    </main>
-</div>
+                @elseif($booking->status == 'rejected')
 
-<script>
-const menuBtn = document.getElementById('menuBtn');
-const sidebar = document.querySelector('.sidebar');
+                    <span style="color:red;font-weight:600;">
+                        Rejected ✖
+                    </span>
 
-menuBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('show');
-});
+                @endif
 
-document.addEventListener('click', (e) => {
-    if(!sidebar.contains(e.target) && !menuBtn.contains(e.target)){
-        sidebar.classList.remove('show');
-    }
-});
-</script>
+                </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="10">Belum ada booking</td>
+                                </tr>
+                                @endforelse
+                            </table>
+                        </section>
+
+                    </main>
+                </div>
+
+            <script>
+            const menuBtn = document.getElementById('menuBtn');
+            const sidebar = document.querySelector('.sidebar');
+
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+            });
+
+            document.addEventListener('click', (e) => {
+                if(!sidebar.contains(e.target) && !menuBtn.contains(e.target)){
+                    sidebar.classList.remove('show');
+                }
+            });
+            </script>
 
 </body>
 </html>
