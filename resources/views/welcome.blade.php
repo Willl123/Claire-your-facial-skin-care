@@ -43,7 +43,7 @@
     <header>
         <div class="header-container">
             <a href="/">
-                <h1 class="nama_brand">CLAIRE</h1>
+                <h1 class="nama_brand">wilujeng</h1>
             </a>
             <nav id="navbar">
                 <a href="#">HOME PAGE</a>
