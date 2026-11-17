@@ -15,23 +15,24 @@ class Booking extends Model
         'phone',
         'booking_date',
         'booking_time',
+        'place',
         'address',
+        'payment_method',
+        'price',
+        'service_fee',
+        'total_price',
         'notes',
         'status',
         'is_hidden',
     ];
 
-    // Relasi dengan customer
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Relasi dengan terapis
     public function therapist(): BelongsTo
     {
         return $this->belongsTo(User::class, 'therapist_id');
     }
-
-    
 }

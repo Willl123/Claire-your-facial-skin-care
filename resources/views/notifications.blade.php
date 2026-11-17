@@ -1,292 +1,377 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Notifications</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications | CLAIRE</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins',sans-serif;
-}
+        body {
+            min-height: 100vh;
+            padding: 40px 20px;
+            background: #f5f7f5;
+            color: #26332a;
+        }
 
-body{
-    background:linear-gradient(135deg,#f7f8fa,#eef2f5);
-    min-height:100vh;
-    padding:40px 20px;
-}
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: auto;
+        }
 
-.container{
-    max-width:950px;
-    margin:auto;
-}
+        /* HEADER */
 
-/* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            padding: 28px 32px;
+            margin-bottom: 30px;
+            background: #fff;
+            border: 1px solid #edf0ed;
+            border-radius: 18px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, .04);
+        }
 
-.header{
-    background:white;
-    padding:25px 30px;
-    border-radius:20px;
-    box-shadow:0 10px 30px rgba(0,0,0,.06);
+        .header h1 {
+            color: #24442f;
+            font-size: 27px;
+            font-weight: 700;
+        }
 
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+        .header p {
+            margin-top: 7px;
+            color: #858b86;
+            font-size: 13px;
+        }
 
-    margin-bottom:25px;
-}
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 19px;
+            background: #24442f;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: .25s;
+        }
 
-.header h1{
-    font-size:28px;
-    color:#24442f;
-    font-weight:700;
-}
+        .back-btn:hover {
+            background: #355c40;
+            transform: translateY(-2px);
+        }
 
-.header p{
-    color:#777;
-    margin-top:5px;
-    font-size:14px;
-}
+        /* NOTIFICATION */
 
-.back-btn{
-    text-decoration:none;
-    background:#24442f;
-    color:white;
-    padding:12px 20px;
-    border-radius:12px;
-    font-size:14px;
-    transition:.3s;
-}
+        .notification {
+            display: flex;
+            margin-bottom: 16px;
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid #edf0ed;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .035);
+            transition: .25s;
+        }
 
-.back-btn:hover{
-    transform:translateY(-2px);
-}
+        .notification:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .07);
+        }
 
-/* NOTIFICATION CARD */
+        .accent {
+            flex: 0 0 5px;
+            background: #24442f;
+        }
 
-.notification{
-    background:white;
-    border-radius:18px;
-    margin-bottom:18px;
-    overflow:hidden;
+        .content {
+            flex: 1;
+            min-width: 0;
+            padding: 23px 25px;
+        }
 
-    box-shadow:0 8px 25px rgba(0,0,0,.06);
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
 
-    display:flex;
-    transition:.3s;
-}
+        .treatment {
+            color: #26332a;
+            font-size: 16px;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
 
-.notification:hover{
-    transform:translateY(-3px);
-    box-shadow:0 15px 35px rgba(0,0,0,.1);
-}
+        .datetime {
+            margin-top: 9px;
+            color: #858b86;
+            font-size: 12px;
+        }
 
-.accent{
-    width:6px;
-    background:#24442f;
-}
+        /* STATUS */
 
-.content{
-    flex:1;
-    padding:22px;
-}
+        .status {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 14px;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
 
-.top-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:20px;
-}
+        .pending {
+            color: #a16207;
+            background: #fef3c7;
+        }
 
-.treatment{
-    font-size:18px;
-    font-weight:600;
-    color:#222;
-}
+        .approved {
+            color: #15803d;
+            background: #dcfce7;
+        }
 
-.datetime{
-    margin-top:8px;
-    color:#777;
-    font-size:14px;
-}
+        .rejected {
+            color: #b91c1c;
+            background: #fee2e2;
+        }
 
-/* STATUS */
+        .completed {
+            color: #1d4ed8;
+            background: #dbeafe;
+        }
 
-.status{
-    padding:8px 16px;
-    border-radius:30px;
-    color:white;
-    font-size:12px;
-    font-weight:600;
-    letter-spacing:.5px;
-    text-transform:uppercase;
-}
+        /* ACTION */
 
-.pending{
-    background:#f59e0b;
-}
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f2f0;
+        }
 
-.approved{
-    background:#16a34a;
-}
+        .delete-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 9px;
+            background: #fff;
+            color: #737a74;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: .25s;
+        }
 
-.rejected{
-    background:#dc2626;
-}
+        .delete-btn:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: #fff;
+        }
 
-.completed{
-    background:#2563eb;
-}
+        /* EMPTY */
 
-/* ACTION */
+        .empty {
+            padding: 65px 25px;
+            background: #fff;
+            border: 1px solid #edf0ed;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, .04);
+        }
 
-.actions{
-    margin-top:20px;
-    display:flex;
-    justify-content:flex-end;
-}
+        .empty-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 65px;
+            height: 65px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: #edf3ee;
+            color: #24442f;
+            font-size: 27px;
+        }
 
-.delete-btn{
-    background:#f3f4f6;
-    border:none;
-    color:#444;
-    padding:10px 18px;
-    border-radius:10px;
-    cursor:pointer;
-    transition:.3s;
-    font-size:13px;
-}
+        .empty h3 {
+            margin-bottom: 9px;
+            color: #24442f;
+            font-size: 17px;
+        }
 
-.delete-btn:hover{
-    background:#dc2626;
-    color:white;
-}
+        .empty p {
+            color: #858b86;
+            font-size: 12px;
+            line-height: 1.8;
+        }
 
-/* EMPTY */
+        /* RESPONSIVE */
 
-.empty{
-    background:white;
-    padding:60px 30px;
-    border-radius:20px;
-    text-align:center;
-    box-shadow:0 10px 30px rgba(0,0,0,.06);
-}
+        @media (max-width: 768px) {
+            body {
+                padding: 22px 14px;
+            }
 
-.empty h3{
-    color:#24442f;
-    margin-bottom:10px;
-}
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 23px 20px;
+            }
 
-.empty p{
-    color:#777;
-}
+            .header h1 {
+                font-size: 23px;
+            }
 
-/* MOBILE */
+            .back-btn {
+                width: 100%;
+            }
 
-@media(max-width:768px){
+            .content {
+                padding: 19px 16px;
+            }
 
-    .header{
-        flex-direction:column;
-        align-items:flex-start;
-        gap:20px;
-    }
+            .top-row {
+                flex-direction: column;
+                gap: 13px;
+            }
 
-    .header h1{
-        font-size:24px;
-    }
+            .treatment {
+                font-size: 15px;
+            }
 
-    .top-row{
-        flex-direction:column;
-        gap:12px;
-    }
+            .status {
+                font-size: 9px;
+            }
+        }
 
-    .status{
-        width:fit-content;
-    }
+        @media (max-width: 400px) {
+            body {
+                padding: 15px 10px;
+            }
 
-}
+            .header {
+                padding: 20px 16px;
+            }
 
-</style>
+            .header h1 {
+                font-size: 21px;
+            }
+
+            .content {
+                padding: 17px 13px;
+            }
+
+            .datetime {
+                font-size: 11px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
 <div class="container">
 
+    <!-- HEADER -->
     <div class="header">
-
         <div>
             <h1>Notifications</h1>
             <p>Monitor all updates related to your treatment bookings.</p>
         </div>
 
         <a href="/dashboard" class="back-btn">
-            Back to Dashboard
+            &larr; Back to Dashboard
         </a>
-
     </div>
 
+    <!-- NOTIFICATION LIST -->
     @forelse($bookings as $b)
 
-    <div class="notification">
+        <div class="notification">
 
-        <div class="accent"></div>
+            <div class="accent"></div>
 
-        <div class="content">
+            <div class="content">
 
-            <div class="top-row">
+                <div class="top-row">
 
-                <div>
-                    <div class="treatment">
-                        {{ $b->treatment }}
+                    <div>
+                        <div class="treatment">
+                            {{ $b->treatment }}
+                        </div>
+
+                        <div class="datetime">
+                            {{ \Carbon\Carbon::parse($b->booking_date)->format('d F Y') }}
+                            &nbsp; | &nbsp;
+                            {{ \Carbon\Carbon::parse($b->booking_time)->format('H:i') }}
+                        </div>
                     </div>
 
-                    <div class="datetime">
-                        {{ $b->booking_date }} • {{ $b->booking_time }}
-                    </div>
+                    <span class="status {{ $b->status }}">
+                        {{ ucfirst($b->status) }}
+                    </span>
+
                 </div>
 
-                <span class="status {{ $b->status }}">
-                    {{ ucfirst($b->status) }}
-                </span>
+                <div class="actions">
 
-            </div>
+                    <form method="POST"
+                          action="{{ route('notifications.hide', $b->id) }}"
+                          onsubmit="return confirm('Apakah kamu yakin ingin menghapus notifikasi ini?')">
 
-            <div class="actions">
+                        @csrf
 
-                <form method="POST"
-                      action="{{ route('notifications.hide', $b->id) }}">
-                    @csrf
+                        <button type="submit" class="delete-btn">
+                            Delete Notification
+                        </button>
 
-                    <button type="submit" class="delete-btn">
-                        Delete Notification
-                    </button>
+                    </form>
 
-                </form>
+                </div>
 
             </div>
 
         </div>
 
-    </div>
-
     @empty
 
-    <div class="empty">
+        <div class="empty">
 
-        <h3>No Notifications Available</h3>
+            <div class="empty-icon">
+                &#128276;
+            </div>
 
-        <p>
-            Notifications regarding booking approvals,
-            rejections, and completions will appear here.
-        </p>
+            <h3>No Notifications Available</h3>
 
-    </div>
+            <p>
+                Notifications regarding booking approvals,
+                rejections, and completions will appear here.
+            </p>
+
+        </div>
 
     @endforelse
 

@@ -229,25 +229,27 @@ Premium Glow Facial - Rp400.000
 </div>
 
 <div class="form-group">
-<label>Booking Time</label>
+    <label>Booking Time</label>
 
-<select name="booking_time">
-<option>07:00</option>
-<option>08:00</option>
-<option>09:00</option>
-<option>10:00</option>
-<option>11:00</option>
-<option>12:00</option>
-<option>13:00</option>
-<option>14:00</option>
-<option>15:00</option>
-<option>16:00</option>
-<option>17:00</option>
-<option>18:00</option>
-<option>19:00</option>
-<option>20:00</option>
-</select>
+    <select name="booking_time" id="booking_time" required>
+        <option value="">Pilih Jam</option>
+        <option value="07:00">07:00</option>
+        <option value="08:00">08:00</option>
+        <option value="09:00">09:00</option>
+        <option value="10:00">10:00</option>
+        <option value="11:00">11:00</option>
+        <option value="12:00">12:00</option>
+        <option value="13:00">13:00</option>
+        <option value="14:00">14:00</option>
+        <option value="15:00">15:00</option>
+        <option value="16:00">16:00</option>
+        <option value="17:00">17:00</option>
+        <option value="18:00">18:00</option>
+        <option value="19:00">19:00</option>
+        <option value="20:00">20:00</option>
+    </select>
 
+    <small id="timeMessage" style="color:#777;"></small>
 </div>
 
 <!-- ================= LOCATION ================= -->
@@ -327,58 +329,174 @@ At Home
 <script>
 
 
+// ================= TREATMENT PRICE =================
+
 const treatment = document.getElementById("treatment");
-
 const selectedTreatment = document.getElementById("selectedTreatment");
-
 const totalPrice = document.getElementById("totalPrice");
 
+const serviceFee = 10000;
+
 function updatePrice() {
-    const price = parseInt(
-        treatment.options[treatment.selectedIndex].dataset.price
-    );
+    const selectedOption = treatment.options[treatment.selectedIndex];
+    const price = parseInt(selectedOption.dataset.price, 10);
 
     selectedTreatment.innerText =
         "Rp " + price.toLocaleString("id-ID");
 
     totalPrice.innerText =
-        "Rp " + (price + 10000).toLocaleString("id-ID");
+        "Rp " + (price + serviceFee).toLocaleString("id-ID");
 }
 
 treatment.addEventListener("change", updatePrice);
 
 updatePrice();
 
-// Address Toggle
-const addressBox = document.getElementById("addressBox");
 
-document.querySelectorAll('input[name="place"]').forEach((r) => {
-    r.addEventListener("change", () => {
-        addressBox.classList.toggle(
-            "hidden",
-            !(r.checked && r.value === "home")
-        );
+// ================= ADDRESS TOGGLE =================
+
+const addressBox = document.getElementById("addressBox");
+const addressInput = document.querySelector('textarea[name="address"]');
+
+document.querySelectorAll('input[name="place"]').forEach((radio) => {
+    radio.addEventListener("change", () => {
+        const isHome = radio.checked && radio.value === "home";
+
+        addressBox.classList.toggle("hidden", !isHome);
+
+        if (addressInput) {
+            addressInput.required = isHome;
+
+            if (!isHome) {
+                addressInput.value = "";
+            }
+        }
     });
 });
 
 
+// ================= DATE VALIDATION =================
+
+const tanggalBooking = document.getElementById("booking_date");
+const jamBooking = document.querySelector('select[name="booking_time"]');
+
+const timeMessage = document.getElementById("timeMessage");
+
+function getLocalDate() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+// Tanggal sebelum hari ini tidak dapat dipilih
+function setTanggalMinimum() {
+    tanggalBooking.min = getLocalDate();
+
+    // Jika tanggal yang sudah dipilih menjadi tanggal lampau,
+    // kosongkan pilihan tanggal dan jam.
+    if (tanggalBooking.value && tanggalBooking.value < getLocalDate()) {
+        tanggalBooking.value = "";
+        jamBooking.value = "";
+    }
+}
 
 
+// ================= TIME VALIDATION =================
 
-const tanggalBooking = document.getElementById('booking_date');
+function updateAvailableTimes() {
+    const now = new Date();
 
-    function setTanggalMinimum() {
-        const hariIni = new Date();
-        const tahun = hariIni.getFullYear();
-        const bulan = String(hariIni.getMonth() + 1).padStart(2, '0');
-        const tanggal = String(hariIni.getDate()).padStart(2, '0');
+    const hariIni = getLocalDate();
+    const tanggalDipilih = tanggalBooking.value;
 
-        const tanggalHariIni = `${tahun}-${bulan}-${tanggal}`;
+    const jamSekarang = now.getHours() * 60 + now.getMinutes();
 
-        tanggalBooking.setAttribute('min', tanggalHariIni);
+    Array.from(jamBooking.options).forEach((option) => {
+        if (option.value === "") return;
+
+        const [hour, minute] = option.value.split(":").map(Number);
+
+        const waktuBooking = hour * 60 + minute;
+
+        const sudahLewat =
+            tanggalDipilih === hariIni &&
+            waktuBooking <= jamSekarang;
+
+        option.disabled = sudahLewat;
+    });
+
+    // Jika jam yang terpilih sudah berlalu, kosongkan
+    if (
+        jamBooking.selectedOptions.length > 0 &&
+        jamBooking.selectedOptions[0].disabled
+    ) {
+        jamBooking.value = "";
     }
 
+    if (tanggalDipilih === hariIni) {
+        timeMessage.textContent =
+            "Jam yang sudah berlalu tidak dapat dipilih.";
+    } else {
+        timeMessage.textContent =
+            "Silakan pilih jam treatment yang tersedia.";
+    }
+
+    
+}
+
+
+// Jalankan validasi ketika tanggal berubah
+tanggalBooking.addEventListener("change", () => {
+    jamBooking.value = "";
+    updateAvailableTimes();
+});
+
+// Atur tanggal minimum ketika halaman dibuka
+setTanggalMinimum();
+
+// Periksa jam ketika halaman dibuka
+updateAvailableTimes();
+
+// Perbarui tanggal dan jam setiap menit
+setInterval(() => {
     setTanggalMinimum();
+    updateAvailableTimes();
+}, 60000);
+
+
+// ================= FORM SUBMIT VALIDATION =================
+
+const bookingForm = document.getElementById("bookingForm");
+
+bookingForm.addEventListener("submit", function (event) {
+    const hariIni = getLocalDate();
+
+    if (!tanggalBooking.value || tanggalBooking.value < hariIni) {
+        event.preventDefault();
+        alert("Tanggal booking tidak valid. Silakan pilih tanggal hari ini atau setelahnya.");
+        return;
+    }
+
+    const now = new Date();
+
+    if (tanggalBooking.value === hariIni) {
+        const [hour, minute] = jamBooking.value.split(":").map(Number);
+
+        const waktuBooking = hour * 60 + minute;
+        const jamSekarang = now.getHours() * 60 + now.getMinutes();
+
+        if (!jamBooking.value || waktuBooking <= jamSekarang) {
+            event.preventDefault();
+            alert("Jam booking sudah berlalu. Silakan pilih jam lain.");
+            return;
+        }
+    }
+});
+
 
 </script>
 

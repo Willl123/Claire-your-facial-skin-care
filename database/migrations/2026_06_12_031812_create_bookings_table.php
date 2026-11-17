@@ -10,31 +10,31 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::create('bookings', function (Blueprint $table) {
+    {
+        Schema::create('bookings', function (Blueprint $table) {
 
-        $table->id();
+            $table->id();
 
-        $table->foreignId('user_id')
-              ->constrained()
-              ->onDelete('cascade');
+            $table->foreignId('user_id')
+                ->constrained()
+                ->onDelete('cascade');
 
-        $table->string('treatment');
+            $table->string('treatment');
 
-        $table->date('booking_date');
+            $table->date('booking_date');
 
-        $table->time('booking_time');
+            $table->time('booking_time');
 
-        $table->text('notes')->nullable();
+            $table->text('notes')->nullable();
 
-        $table->enum(
-            'status',
-            ['pending','approved','rejected']
-        )->default('pending');
+            $table->enum(
+                'status',
+                ['pending', 'approved', 'rejected']
+            )->default('pending');
 
-        $table->timestamps();
-    });
-}
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.

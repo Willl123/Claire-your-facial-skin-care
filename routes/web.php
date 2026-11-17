@@ -23,7 +23,6 @@ Route::get('/', function () {
         ->get();
 
     return view('welcome', compact('notifications'));
-
 });
 
 /*
@@ -42,8 +41,8 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister']);
 
     Route::post('/register', [AuthController::class, 'register']);
-
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -53,7 +52,11 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
-    Route::get('/admin', [AdminController::class, 'index']);
+    Route::get('/admin', [AdminController::class, 'index'])
+        ->name('admin.dashboard');
+
+    Route::get('/admin/therapist-schedules', [AdminController::class, 'therapistSchedules'])
+        ->name('admin.therapistSchedules');
 
     Route::get('/booking/{id}/approve', [BookingController::class, 'approve']);
 
@@ -66,7 +69,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/notifications/{id}/hide', [BookingController::class, 'hide'])
         ->name('notifications.hide');
 
+    Route::post('/booking/{id}/assign-therapist', [BookingController::class, 'assignTherapist'])
+        ->name('booking.assignTherapist');
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -90,12 +96,11 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::post('/profile/photo', [CustomerController::class, 'uploadPhoto'])
         ->name('profile.photo');
 
-          Route::get('/notifications', [BookingController::class, 'notifications'])
+    Route::get('/notifications', [BookingController::class, 'notifications'])
         ->name('notifications');
 
     Route::post('/notifications/{id}/hide', [BookingController::class, 'hide'])
         ->name('notifications.hide');
-
 });
 
 /*
@@ -109,7 +114,7 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->name('logout');
 
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | Therapist
 |--------------------------------------------------------------------------
@@ -120,7 +125,16 @@ Route::middleware(['auth', 'role:therapist'])->group(function () {
     Route::get('/therapist', [TherapistController::class, 'index'])
         ->name('therapist.dashboard');
 
+    Route::post('/therapist/booking/{id}/complete', [TherapistController::class, 'complete'])
+        ->name('therapist.booking.complete');
 });
 
 Route::post('/booking/{id}/assign-therapist', [BookingController::class, 'assignTherapist'])
     ->name('booking.assignTherapist');
+
+Route::middleware(['auth', 'role:therapist'])->group(function () {
+
+
+    Route::post('/therapist/toggle-availability', [TherapistController::class, 'toggleAvailability'])
+        ->name('therapist.toggleAvailability');
+});
