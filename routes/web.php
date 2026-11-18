@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,7 @@ Route::get('/', function () {
 
     return view('welcome', compact('notifications'));
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -52,33 +54,33 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
+    // Dashboard Admin
     Route::get('/admin', [AdminController::class, 'index'])
         ->name('admin.dashboard');
 
+    // Jadwal Terapis
     Route::get('/admin/therapist-schedules', [AdminController::class, 'therapistSchedules'])
         ->name('admin.therapistSchedules');
 
-    Route::get('/booking/{id}/approve', [BookingController::class, 'approve']);
+    // Menyetujui penugasan terapis
+    Route::post('/booking/{id}/approve', [BookingController::class, 'approve'])
+        ->name('booking.approve');
 
-    Route::get('/booking/{id}/reject', [BookingController::class, 'reject']);
+    // Menolak penugasan terapis
+    Route::post('/booking/{id}/reject-assignment', [BookingController::class, 'rejectAssignment'])
+        ->name('booking.rejectAssignment');
 
-    Route::get('/booking/{id}/complete', [BookingController::class, 'complete']);
+    // Menolak pesanan customer
+    Route::post('/booking/{id}/reject', [BookingController::class, 'reject'])
+        ->name('booking.reject');
 
-    Route::get('/notifications', [BookingController::class, 'notifications']);
-
-    Route::post('/notifications/{id}/hide', [BookingController::class, 'hide'])
-        ->name('notifications.hide');
-
+    // Menugaskan terapis
     Route::post('/booking/{id}/assign-therapist', [BookingController::class, 'assignTherapist'])
         ->name('booking.assignTherapist');
 
-    Route::middleware(['auth', 'role:admin'])->group(function () {
-
-        Route::post(
-            '/booking/{id}/assign-therapist',
-            [BookingController::class, 'assignTherapist']
-        )->name('booking.assignTherapist');
-    });
+    // Notifikasi Admin
+    Route::get('/admin/notifications', [BookingController::class, 'notifications'])
+        ->name('admin.notifications');
 });
 
 
@@ -90,36 +92,32 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 Route::middleware(['auth', 'role:customer'])->group(function () {
 
-    Route::get('/dashboard', [DashboardController::class, 'index']);
+    // Dashboard Customer
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('customer.dashboard');
 
+    // Profil
     Route::get('/profile', [CustomerController::class, 'profile'])
         ->name('profile');
-
-    Route::get('/booking', function () {
-        return view('booking');
-    });
-
-    Route::post('/booking/store', [BookingController::class, 'store']);
 
     Route::post('/profile/photo', [CustomerController::class, 'uploadPhoto'])
         ->name('profile.photo');
 
+    // Booking
+    Route::get('/booking', function () {
+        return view('booking');
+    })->name('booking');
+
+    Route::post('/booking/store', [BookingController::class, 'store'])
+        ->name('booking.store');
+
+    // Notifikasi Customer
     Route::get('/notifications', [BookingController::class, 'notifications'])
         ->name('notifications');
 
     Route::post('/notifications/{id}/hide', [BookingController::class, 'hide'])
         ->name('notifications.hide');
 });
-
-/*
-|--------------------------------------------------------------------------
-| Logout
-|--------------------------------------------------------------------------
-*/
-
-Route::post('/logout', [AuthController::class, 'logout'])
-    ->middleware('auth')
-    ->name('logout');
 
 
 /*
@@ -130,29 +128,34 @@ Route::post('/logout', [AuthController::class, 'logout'])
 
 Route::middleware(['auth', 'role:therapist'])->group(function () {
 
+    // Dashboard Terapis
     Route::get('/therapist', [TherapistController::class, 'index'])
         ->name('therapist.dashboard');
 
-    Route::post('/therapist/booking/{id}/complete', [TherapistController::class, 'complete'])
-        ->name('therapist.booking.complete');
-});
-
-Route::post('/booking/{id}/assign-therapist', [BookingController::class, 'assignTherapist'])
-    ->name('booking.assignTherapist');
-
-Route::middleware(['auth', 'role:therapist'])->group(function () {
-
-
+    // Mengaktifkan / menonaktifkan ketersediaan
     Route::post('/therapist/toggle-availability', [TherapistController::class, 'toggleAvailability'])
         ->name('therapist.toggleAvailability');
+
+    // Menerima penugasan
+    Route::post('/therapist/assignment/{id}/accept', [TherapistController::class, 'acceptAssignment'])
+        ->name('therapist.assignment.accept');
+
+    // Menolak penugasan
+    Route::post('/therapist/assignment/{id}/reject', [TherapistController::class, 'rejectAssignment'])
+        ->name('therapist.assignment.reject');
+
+    // Menyelesaikan treatment
+    Route::post('/therapist/assignment/{id}/complete', [TherapistController::class, 'complete'])
+        ->name('therapist.assignment.complete');
 });
 
-Route::post(
-    '/therapist/assignment/{id}/accept',
-    [TherapistController::class, 'acceptAssignment']
-)->name('therapist.assignment.accept');
 
-Route::post(
-    '/therapist/assignment/{id}/reject',
-    [TherapistController::class, 'rejectAssignment']
-)->name('therapist.assignment.reject');
+/*
+|--------------------------------------------------------------------------
+| Logout
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');

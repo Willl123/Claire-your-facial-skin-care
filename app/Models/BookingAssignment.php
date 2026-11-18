@@ -11,12 +11,15 @@ class BookingAssignment extends Model
         'booking_id',
         'therapist_id',
         'status',
+        'admin_status',
         'rejection_reason',
         'responded_at',
+        'admin_responded_at',
     ];
 
     protected $casts = [
         'responded_at' => 'datetime',
+        'admin_responded_at' => 'datetime',
     ];
 
     public function booking(): BelongsTo

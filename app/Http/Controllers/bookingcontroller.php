@@ -4,17 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\User;
+use App\Models\BookingAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
-use App\Models\BookingAssignment;
-use Illuminate\Support\Facades\DB;
-
 
 class BookingController extends Controller
 {
-    // Menyimpan booking customer
+    // =========================================
+    // CUSTOMER MEMBUAT BOOKING
+    // =========================================
+
     public function store(Request $request)
     {
         $request->validate([
@@ -29,7 +31,6 @@ class BookingController extends Controller
             'notes' => 'nullable|string|max:2000',
         ]);
 
-        // Validasi tanggal dan waktu berdasarkan zona waktu aplikasi
         $bookingDateTime = Carbon::createFromFormat(
             'Y-m-d H:i',
             $request->booking_date . ' ' . $request->booking_time,
@@ -42,7 +43,6 @@ class BookingController extends Controller
             ]);
         }
 
-        // Harga treatment ditentukan oleh server
         $treatmentPrices = [
             'Deep Cleansing Facial' => 150000,
             'Acne Facial' => 200000,
@@ -54,7 +54,6 @@ class BookingController extends Controller
 
         $price = $treatmentPrices[$request->treatment];
         $serviceFee = 10000;
-        $totalPrice = $price + $serviceFee;
 
         Booking::create([
             'user_id' => Auth::id(),
@@ -70,7 +69,7 @@ class BookingController extends Controller
             'payment_method' => $request->payment_method,
             'price' => $price,
             'service_fee' => $serviceFee,
-            'total_price' => $totalPrice,
+            'total_price' => $price + $serviceFee,
             'notes' => $request->notes,
             'status' => 'pending',
         ]);
@@ -79,44 +78,147 @@ class BookingController extends Controller
             ->with('success', 'Booking berhasil dibuat.');
     }
 
-    // Admin menyetujui booking
+
+    // =========================================
+    // ADMIN MENYETUJUI PENUGASAN TERAPIS
+    // =========================================
+
     public function approve($id)
     {
-        $booking = Booking::findOrFail($id);
+        DB::transaction(function () use ($id) {
 
-        $booking->status = 'approved';
-        $booking->save();
+            $booking = Booking::where('id', $id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        return back()->with('success', 'Booking berhasil disetujui.');
+            if ($booking->status !== 'pending') {
+                throw ValidationException::withMessages([
+                    'booking' => 'Pesanan ini tidak lagi menunggu persetujuan.',
+                ]);
+            }
+
+            $assignment = BookingAssignment::where('booking_id', $booking->id)
+                ->where('status', 'accepted')
+                ->where('admin_status', 'pending')
+                ->lockForUpdate()
+                ->latest('id')
+                ->first();
+
+            if (!$assignment) {
+                throw ValidationException::withMessages([
+                    'booking' => 'Terapis belum menerima tugas atau penugasan tidak tersedia.',
+                ]);
+            }
+
+            $assignment->update([
+                'admin_status' => 'approved',
+                'admin_responded_at' => now(),
+            ]);
+
+            $booking->update([
+                'status' => 'approved',
+            ]);
+        });
+
+        return back()->with(
+            'success',
+            'Penugasan terapis berhasil disetujui. Customer dapat melihat pesanan Disetujui.'
+        );
     }
 
-    // Admin menolak booking
+
+    // =========================================
+    // ADMIN MENOLAK PENUGASAN TERAPIS
+    // =========================================
+
+    public function rejectAssignment($id)
+    {
+        DB::transaction(function () use ($id) {
+
+            $booking = Booking::where('id', $id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($booking->status !== 'pending') {
+                throw ValidationException::withMessages([
+                    'booking' => 'Pesanan ini tidak dapat diproses lagi.',
+                ]);
+            }
+
+            $assignment = BookingAssignment::where('booking_id', $booking->id)
+                ->where('status', 'accepted')
+                ->where('admin_status', 'pending')
+                ->lockForUpdate()
+                ->latest('id')
+                ->first();
+
+            if (!$assignment) {
+                throw ValidationException::withMessages([
+                    'booking' => 'Tidak ada penugasan yang menunggu persetujuan admin.',
+                ]);
+            }
+
+            $assignment->update([
+                'admin_status' => 'rejected',
+                'admin_responded_at' => now(),
+            ]);
+
+            // Lepaskan terapis dari booking agar dapat ditugaskan ulang.
+            $booking->update([
+                'therapist_id' => null,
+            ]);
+        });
+
+        return back()->with(
+            'success',
+            'Penugasan terapis ditolak. Silakan pilih terapis lain.'
+        );
+    }
+
+
+    // =========================================
+    // ADMIN MENOLAK PESANAN CUSTOMER
+    // =========================================
+
     public function reject($id)
     {
         $booking = Booking::findOrFail($id);
 
-        $booking->status = 'rejected';
-        $booking->save();
-
-        return back()->with('success', 'Booking berhasil ditolak.');
-    }
-
-    // Menandai booking selesai
-    public function complete($id)
-    {
-        $booking = Booking::findOrFail($id);
-
-        if ($booking->status !== 'approved') {
-            return back()->with('error', 'Booking harus disetujui terlebih dahulu.');
+        if ($booking->status !== 'pending') {
+            return back()->with(
+                'error',
+                'Pesanan ini tidak lagi menunggu persetujuan.'
+            );
         }
 
-        $booking->status = 'completed';
-        $booking->save();
+        $booking->update([
+            'status' => 'rejected',
+        ]);
 
-        return back()->with('success', 'Booking berhasil diselesaikan.');
+        return back()->with(
+            'success',
+            'Pesanan customer berhasil ditolak.'
+        );
     }
 
-    // Menampilkan booking milik customer
+
+    // =========================================
+    // ADMIN MENYELESAIKAN BOOKING (JIKA MASIH DIPAKAI)
+    // =========================================
+
+    public function complete($id)
+    {
+        return back()->with(
+            'error',
+            'Penyelesaian treatment dilakukan oleh terapis yang ditugaskan.'
+        );
+    }
+
+
+    // =========================================
+    // CUSTOMER MELIHAT BOOKING
+    // =========================================
+
     public function index()
     {
         $bookings = Booking::where('user_id', Auth::id())
@@ -126,7 +228,11 @@ class BookingController extends Controller
         return view('dashboard', compact('bookings'));
     }
 
-    // Menampilkan notifikasi customer
+
+    // =========================================
+    // NOTIFIKASI CUSTOMER
+    // =========================================
+
     public function notifications()
     {
         $bookings = Booking::where('user_id', Auth::id())
@@ -137,7 +243,11 @@ class BookingController extends Controller
         return view('notifications', compact('bookings'));
     }
 
-    // Menyembunyikan notifikasi
+
+    // =========================================
+    // MENYEMBUNYIKAN NOTIFIKASI
+    // =========================================
+
     public function hide($id)
     {
         $booking = Booking::where('id', $id)
@@ -148,10 +258,16 @@ class BookingController extends Controller
             'is_hidden' => true,
         ]);
 
-        return back()->with('success', 'Notifikasi berhasil disembunyikan.');
+        return back()->with(
+            'success',
+            'Notifikasi berhasil disembunyikan.'
+        );
     }
 
-    // Admin menugaskan terapis aktif
+
+    // =========================================
+    // ADMIN MENUGASKAN TERAPIS
+    // =========================================
 
     public function assignTherapist(Request $request, $id)
     {
@@ -161,56 +277,75 @@ class BookingController extends Controller
 
         DB::transaction(function () use ($request, $id) {
 
-            // Mengunci data booking agar tidak diproses bersamaan
             $booking = Booking::where('id', $id)
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            // Mengunci data terapis untuk mencegah penugasan bersamaan
+            // Pesanan yang sudah ditolak atau selesai tidak dapat ditugaskan.
+            if (in_array($booking->status, ['rejected', 'completed'])) {
+                throw ValidationException::withMessages([
+                    'therapist_id' => 'Pesanan ini tidak dapat ditugaskan.',
+                ]);
+            }
+
             $therapist = User::where('id', $request->therapist_id)
                 ->where('role', 'therapist')
                 ->lockForUpdate()
                 ->first();
 
             if (!$therapist || !$therapist->is_available) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
+                throw ValidationException::withMessages([
                     'therapist_id' => 'Terapis tidak tersedia atau sedang nonaktif.',
                 ]);
             }
 
-            // Mencegah penugasan aktif yang sama dibuat berulang
+            // Cegah penugasan aktif ganda kepada terapis yang sama.
             $sameAssignment = BookingAssignment::where('booking_id', $booking->id)
                 ->where('therapist_id', $therapist->id)
                 ->whereIn('status', ['pending', 'accepted'])
+                ->where(function ($query) {
+                    $query->where('status', 'pending')
+                        ->orWhere('admin_status', 'approved')
+                        ->orWhere(function ($subQuery) {
+                            $subQuery->where('status', 'accepted')
+                                ->where('admin_status', 'pending');
+                        });
+                })
                 ->exists();
 
             if ($sameAssignment) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
+                throw ValidationException::withMessages([
                     'therapist_id' => 'Pekerjaan ini sudah ditugaskan kepada terapis tersebut.',
                 ]);
             }
 
-            // Menghitung waktu pekerjaan baru: 2 jam
             $newStart = Carbon::parse(
                 $booking->booking_date . ' ' . $booking->booking_time
             );
 
             $newEnd = $newStart->copy()->addHours(2);
 
-            // Mengambil penugasan aktif terapis pada tanggal yang sama
+            // Hanya pending dan accepted yang belum ditolak admin,
+            // atau sudah disetujui admin, dianggap jadwal aktif.
             $existingAssignments = BookingAssignment::with('booking')
                 ->where('therapist_id', $therapist->id)
                 ->whereIn('status', ['pending', 'accepted'])
+                ->where(function ($query) {
+                    $query->where('status', 'pending')
+                        ->orWhere('admin_status', 'approved')
+                        ->orWhere(function ($subQuery) {
+                            $subQuery->where('status', 'accepted')
+                                ->where('admin_status', 'pending');
+                        });
+                })
                 ->whereHas('booking', function ($query) use ($booking) {
                     $query->whereDate('booking_date', $booking->booking_date);
                 })
                 ->lockForUpdate()
                 ->get();
 
-            // Memeriksa apakah jadwal bertabrakan
             foreach ($existingAssignments as $assignment) {
 
-                // Booking yang sedang ditugaskan tidak dihitung sebagai bentrok
                 if ($assignment->booking_id == $booking->id) {
                     continue;
                 }
@@ -222,33 +357,43 @@ class BookingController extends Controller
 
                 $existingEnd = $existingStart->copy()->addHours(2);
 
-                // Memeriksa tabrakan waktu
                 if ($newStart->lt($existingEnd) && $existingStart->lt($newEnd)) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
+                    throw ValidationException::withMessages([
                         'therapist_id' =>
                         'Terapis sudah memiliki jadwal pada waktu tersebut. Silakan pilih terapis lain atau jam berbeda.',
                     ]);
                 }
             }
 
-            // Menandai penugasan aktif sebelumnya sebagai digantikan
+            // Tandai penugasan aktif sebelumnya sebagai digantikan.
             BookingAssignment::where('booking_id', $booking->id)
-                ->whereIn('status', ['pending', 'accepted'])
+                ->where(function ($query) {
+                    $query->where('status', 'pending')
+                        ->orWhere(function ($subQuery) {
+                            $subQuery->where('status', 'accepted')
+                                ->where('admin_status', 'pending');
+                        })
+                        ->orWhere(function ($subQuery) {
+                            $subQuery->where('status', 'accepted')
+                                ->where('admin_status', 'approved');
+                        });
+                })
                 ->update([
                     'status' => 'reassigned',
                     'updated_at' => now(),
                 ]);
 
-            // Membuat riwayat penugasan baru
+            // Buat penugasan baru.
             BookingAssignment::create([
                 'booking_id' => $booking->id,
                 'therapist_id' => $therapist->id,
                 'status' => 'pending',
+                'admin_status' => 'pending',
             ]);
 
-            // Mempertahankan relasi therapist_id pada tabel bookings
             $booking->update([
                 'therapist_id' => $therapist->id,
+                'status' => 'pending',
             ]);
         });
 

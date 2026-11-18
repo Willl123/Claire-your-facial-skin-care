@@ -1051,9 +1051,31 @@
                             {{ $booking->user->name ?? 'Customer' }}
                         </div>
 
-                        <span class="event-status {{ $assignment->status }}">
-                            {{ $assignment->status === 'accepted' ? 'Diterima' : 'Selesai' }}
+                        @if($assignment->status === 'completed')
+
+                        <span class="event-status completed">
+                            Selesai
                         </span>
+
+                        @elseif($assignment->status === 'accepted' && $assignment->admin_status === 'approved')
+
+                        <span class="event-status approved">
+                            Disetujui Admin
+                        </span>
+
+                        @elseif($assignment->status === 'accepted' && $assignment->admin_status === 'pending')
+
+                        <span class="event-status pending">
+                            Menunggu Persetujuan Admin
+                        </span>
+
+                        @elseif($assignment->status === 'accepted' && $assignment->admin_status === 'rejected')
+
+                        <span class="event-status rejected">
+                            Ditolak Admin
+                        </span>
+
+                        @endif
 
 
                         <!-- BOOKING DETAILS -->
@@ -1124,24 +1146,32 @@
 
 
                         <!-- COMPLETE BOOKING -->
-                        @if($assignment->status === 'accepted')
+                        @if($assignment->status === 'accepted' && $assignment->admin_status === 'approved')
 
                         <form
-                            action="{{ route('therapist.booking.complete', $booking->id) }}"
-                            method="POST">
+                            action="{{ route('therapist.assignment.complete', $assignment->id) }}"
+                            method="POST"
+                            onsubmit="return confirm('Apakah treatment ini sudah selesai?')">
 
                             @csrf
 
-                            <button
-                                type="submit"
-                                class="btn-complete"
-                                onclick="return confirm('Apakah treatment ini sudah selesai?')">
-
+                            <button type="submit" class="btn-complete">
                                 Tandai Selesai
-
                             </button>
 
                         </form>
+
+                        @elseif($assignment->status === 'accepted' && $assignment->admin_status === 'pending')
+
+                        <span class="event-status pending">
+                            Menunggu Persetujuan Admin
+                        </span>
+
+                        @elseif($assignment->status === 'accepted' && $assignment->admin_status === 'rejected')
+
+                        <span class="event-status rejected">
+                            Ditolak Admin
+                        </span>
 
                         @elseif($assignment->status === 'completed')
 
@@ -1150,7 +1180,6 @@
                         </span>
 
                         @endif
-
                     </div>
 
                     @empty

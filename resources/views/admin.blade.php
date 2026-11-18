@@ -747,13 +747,77 @@
                             </td>
 
 
+
+                            <!-- ASSIGN THERAPIST -->
                             <td>
-                                @if($latestAssignment)
-                                {{ $latestAssignment->therapist->name ?? 'Belum ditugaskan' }}
+
+                                @php
+                                $canAssign = $booking->status === 'pending' && (
+                                !$latestAssignment ||
+                                $latestAssignment->status === 'rejected' ||
+                                $latestAssignment->status === 'reassigned' ||
+                                (
+                                $latestAssignment->status === 'accepted' &&
+                                $latestAssignment->admin_status === 'rejected'
+                                )
+                                );
+                                @endphp
+
+                                @if($canAssign)
+
+                                <form
+                                    action="{{ route('booking.assignTherapist', $booking->id) }}"
+                                    method="POST"
+                                    class="assign-form">
+
+                                    @csrf
+
+                                    <select name="therapist_id" required>
+
+                                        <option value="">Pilih Terapis</option>
+
+                                        @foreach($therapists as $therapist)
+
+                                        <option
+                                            value="{{ $therapist->id }}"
+                                            {{ $booking->therapist_id == $therapist->id ? 'selected' : '' }}
+                                            {{ !$therapist->is_available ? 'disabled' : '' }}>
+
+                                            {{ $therapist->name }}
+                                            {{ !$therapist->is_available ? '(Nonaktif)' : '' }}
+
+                                        </option>
+
+                                        @endforeach
+
+                                    </select>
+
+                                    <button type="submit" class="btn btn-approve">
+                                        {{ $latestAssignment ? 'Tugaskan Ulang' : 'Simpan' }}
+                                    </button>
+
+                                </form>
+
+                                @elseif($latestAssignment && $latestAssignment->status === 'pending')
+
+                                <span>Menunggu respons terapis</span>
+
+                                @elseif(
+                                $latestAssignment &&
+                                $latestAssignment->status === 'accepted' &&
+                                $latestAssignment->admin_status === 'pending'
+                                )
+
+                                <span>Menunggu keputusan admin</span>
+
                                 @else
-                                {{ $booking->therapist->name ?? 'Belum ditugaskan' }}
+
+                                -
+
                                 @endif
+
                             </td>
+
 
 
 
@@ -786,76 +850,188 @@
                             </td>
 
 
-                            <td>
-                                @if($latestAssignment)
-                                @if($latestAssignment->status === 'pending')
-                                <span class="status status-pending">Menunggu</span>
 
-                                @elseif($latestAssignment->status === 'accepted')
-                                <span class="status status-approved">Diterima</span>
+                            <td>
+                                @if($booking->status === 'rejected')
+
+                                <span class="status status-rejected">
+                                    Pesanan Ditolak
+                                </span>
+
+                                @elseif($booking->status === 'completed')
+
+                                <span class="status status-completed">
+                                    Selesai
+                                </span>
+
+                                @elseif($latestAssignment)
+
+                                @if($latestAssignment->status === 'pending')
+
+                                <span class="status status-pending">
+                                    Menunggu Terapis
+                                </span>
 
                                 @elseif($latestAssignment->status === 'rejected')
-                                <span class="status status-rejected">Ditolak</span>
+
+                                <span class="status status-rejected">
+                                    Ditolak Terapis
+                                </span>
+
+                                @elseif($latestAssignment->status === 'accepted')
+
+                                @if($latestAssignment->admin_status === 'pending')
+
+                                <span class="status status-pending">
+                                    Menunggu Persetujuan Admin
+                                </span>
+
+                                @elseif($latestAssignment->admin_status === 'approved')
+
+                                <span class="status status-approved">
+                                    Disetujui
+                                </span>
+
+                                @elseif($latestAssignment->admin_status === 'rejected')
+
+                                <span class="status status-rejected">
+                                    Ditolak Admin
+                                </span>
+
+                                @endif
 
                                 @elseif($latestAssignment->status === 'completed')
-                                <span class="status status-completed">Selesai</span>
+
+                                <span class="status status-completed">
+                                    Selesai
+                                </span>
 
                                 @elseif($latestAssignment->status === 'reassigned')
-                                <span class="status status-pending">Ditugaskan Ulang</span>
+
+                                <span class="status status-pending">
+                                    Ditugaskan Ulang
+                                </span>
+
                                 @endif
+
                                 @else
-                                @if($booking->status === 'pending')
-                                <span class="status status-pending">Pending</span>
-                                @elseif($booking->status === 'approved')
-                                <span class="status status-approved">Approved</span>
-                                @elseif($booking->status === 'rejected')
-                                <span class="status status-rejected">Rejected</span>
-                                @elseif($booking->status === 'completed')
-                                <span class="status status-completed">Completed</span>
-                                @endif
+
+                                <span class="status status-pending">
+                                    Belum Ditugaskan
+                                </span>
+
                                 @endif
                             </td>
 
 
-                            <!-- ASSIGN THERAPIST -->
+
+
+                            <!-- ACTION -->
                             <td>
 
-                                @if($booking->status !== 'rejected' && $booking->status !== 'completed')
+                                @if($booking->status === 'rejected')
+
+                                <span style="color:#bd3333;font-weight:600;">
+                                    Pesanan Ditolak
+                                </span>
+
+                                @elseif($booking->status === 'completed')
+
+                                <span style="color:#2764a4;font-weight:600;">
+                                    Selesai
+                                </span>
+
+                                @elseif($booking->status === 'pending')
+
+                                @if($latestAssignment)
+
+                                @if($latestAssignment->status === 'pending')
+
+                                <span style="color:#a36b00;">
+                                    Menunggu respons terapis
+                                </span>
+
+                                @elseif($latestAssignment->status === 'rejected')
+
+                                <span style="color:#bd3333;">
+                                    Terapis menolak tugas
+                                </span>
+
+                                @elseif($latestAssignment->status === 'accepted')
+
+                                @if($latestAssignment->admin_status === 'pending')
 
                                 <form
-                                    action="{{ route('booking.assignTherapist', $booking->id) }}"
+                                    action="{{ route('booking.approve', $booking->id) }}"
                                     method="POST"
-                                    class="assign-form">
+                                    style="display:inline;">
 
                                     @csrf
 
-                                    <select name="therapist_id" required>
-                                        <option value="">Pilih Terapis</option>
-
-                                        @if($booking->therapist && !$therapists->contains('id', $booking->therapist_id))
-                                        <option value="{{ $booking->therapist_id }}" selected disabled>
-                                            {{ $booking->therapist->name }} (Nonaktif)
-                                        </option>
-                                        @endif
-
-                                        @foreach($therapists as $therapist)
-                                        <option
-                                            value="{{ $therapist->id }}"
-                                            {{ $booking->therapist_id == $therapist->id ? 'selected' : '' }}>
-                                            {{ $therapist->name }}
-                                        </option>
-                                        @endforeach
-
-                                    </select>
-
                                     <button type="submit" class="btn btn-approve">
-                                        Simpan
+                                        Approve Penugasan
                                     </button>
 
                                 </form>
 
+                                <form
+                                    action="{{ route('booking.rejectAssignment', $booking->id) }}"
+                                    method="POST"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('Yakin ingin menolak penugasan terapis ini? Customer tetap berstatus Menunggu.');">
+
+                                    @csrf
+
+                                    <button type="submit" class="btn btn-reject">
+                                        Reject Penugasan
+                                    </button>
+
+                                </form>
+
+                                @elseif($latestAssignment->admin_status === 'approved')
+
+                                <span style="color:#24733a;font-weight:600;">
+                                    Disetujui Admin
+                                </span>
+
+                                @elseif($latestAssignment->admin_status === 'rejected')
+
+                                <span style="color:#bd3333;">
+                                    Ditolak Admin
+                                </span>
+
+                                @endif
+
+                                @endif
+
                                 @else
-                                -
+
+                                <span style="color:#a36b00;">
+                                    Belum ada terapis
+                                </span>
+
+                                @endif
+
+                                <form
+                                    action="{{ route('booking.reject', $booking->id) }}"
+                                    method="POST"
+                                    style="margin-top:6px;"
+                                    onsubmit="return confirm('Yakin ingin menolak pesanan customer ini?');">
+
+                                    @csrf
+
+                                    <button type="submit" class="btn btn-reject">
+                                        Tolak Pesanan
+                                    </button>
+
+                                </form>
+
+                                @elseif($booking->status === 'approved')
+
+                                <span style="color:#24733a;font-weight:600;">
+                                    Disetujui
+                                </span>
+
                                 @endif
 
                             </td>
