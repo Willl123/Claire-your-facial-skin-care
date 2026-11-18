@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -235,56 +235,57 @@
 
 <body>
 
-<div class="container">
+    <div class="container">
 
-    <div class="header">
-        <div>
-            <h1>Kalender Jadwal Terapis</h1>
-            <p>Kelola dan pantau jadwal treatment seluruh terapis CLAIRE.</p>
-        </div>
-
-        <a href="{{ route('admin.dashboard') }}" class="back-button">
-            Kembali ke Dashboard
-        </a>
-    </div>
-
-    
-
-    <div class="calendar-card">
-
-        <div class="calendar-header">
-            <h2>
-                {{ $currentMonth->locale('id')->translatedFormat('F Y') }}
-            </h2>
-
-            <div class="month-navigation">
-                <a href="{{ route('admin.therapistSchedules', ['month' => $previousMonth]) }}"
-                   class="month-button">
-                    &laquo; Sebelumnya
-                </a>
-
-                <a href="{{ route('admin.therapistSchedules', ['month' => $nextMonth]) }}"
-                   class="month-button">
-                    Berikutnya &raquo;
-                </a>
+        <div class="header">
+            <div>
+                <h1>Kalender Jadwal Terapis</h1>
+                <p>Kelola dan pantau jadwal treatment seluruh terapis CLAIRE.</p>
             </div>
+
+            <a href="{{ route('admin.dashboard') }}" class="back-button">
+                Kembali ke Dashboard
+            </a>
         </div>
 
-        <div class="calendar-grid">
 
-            @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $weekday)
+
+
+        <div class="calendar-card">
+
+            <div class="calendar-header">
+                <h2>
+                    {{ $currentMonth->locale('id')->translatedFormat('F Y') }}
+                </h2>
+
+                <div class="month-navigation">
+                    <a href="{{ route('admin.therapistSchedules', ['month' => $previousMonth]) }}"
+                        class="month-button">
+                        &laquo; Sebelumnya
+                    </a>
+
+                    <a href="{{ route('admin.therapistSchedules', ['month' => $nextMonth]) }}"
+                        class="month-button">
+                        Berikutnya &raquo;
+                    </a>
+                </div>
+            </div>
+
+            <div class="calendar-grid">
+
+                @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $weekday)
                 <div class="weekday">
                     {{ $weekday }}
                 </div>
-            @endforeach
+                @endforeach
 
-            @foreach($calendarDays as $day)
+                @foreach($calendarDays as $day)
 
                 @php
-                    $dateKey = $day->format('Y-m-d');
-                    $dayBookings = $bookings->get($dateKey, collect());
-                    $isCurrentMonth = $day->month === $currentMonth->month;
-                    $isToday = $day->isToday();
+                $dateKey = $day->format('Y-m-d');
+                $dayAssignments = $assignments->get($dateKey, collect());
+                $isCurrentMonth = $day->month === $currentMonth->month;
+                $isToday = $day->isToday();
                 @endphp
 
                 <div class="calendar-day {{ $isCurrentMonth ? '' : 'other-month' }}">
@@ -293,53 +294,71 @@
                         {{ $day->day }}
                     </div>
 
-                    @foreach($dayBookings as $booking)
+                    @foreach($dayAssignments as $assignment)
 
-                        <div class="booking-event">
+                    @php
+                    $booking = $assignment->booking;
+                    @endphp
 
-                            <strong>
-                                {{ \Carbon\Carbon::parse($booking->booking_time)->format('H:i') }}
-                                - {{ $booking->treatment }}
-                            </strong>
+                    @php
+                    $latestAssignment = $booking->assignments
+                    ->sortByDesc('id')
+                    ->first();
+                    @endphp
 
-                            <span>
-                                Pelanggan:
-                                {{ $booking->user->name ?? 'Tidak tersedia' }}
-                            </span>
+                    <div class="booking-event">
 
-                            <span>
-                                Terapis:
-                                {{ $booking->therapist->name ?? 'Tidak tersedia' }}
-                            </span>
+                        <strong>
+                            {{ \Carbon\Carbon::parse($booking->booking_time)->format('H:i') }}
+                            - {{ $booking->treatment }}
+                        </strong>
 
-                            @if($booking->therapist)
-                                <span class="therapist-status {{ $booking->therapist->is_available ? 'active' : 'inactive' }}">
-                                    {{ $booking->therapist->is_available ? 'Aktif' : 'Nonaktif' }}
-                                </span>
-                            @endif
+                        <span>
+                            Pelanggan:
+                            {{ $booking->user->name ?? 'Tidak tersedia' }}
+                        </span>
 
-                        </div>
+                        <span>
+                            Terapis:
+                            {{ $latestAssignment->therapist->name ?? $booking->therapist->name ?? 'Tidak tersedia' }}
+                        </span>
+
+                        @if($latestAssignment)
+                        @if($latestAssignment->status === 'accepted')
+                        <span class="event-status status-approved">
+                            Diterima
+                        </span>
+                        @elseif($latestAssignment->status === 'completed')
+                        <span class="event-status status-completed">
+                            Selesai
+                        </span>
+                        @endif
+                        @endif
+
+                    </div>
 
                     @endforeach
 
                 </div>
 
-            @endforeach
+                @endforeach
 
-        </div>
+            </div>
 
-        @if($bookings->isEmpty())
+            @if($assignments->isEmpty())
             <div class="empty-message">
                 Belum ada jadwal terapis pada bulan ini.
             </div>
-        @endif
+            @endif
+
+        </div>
+
+
 
     </div>
 
-   
     </div>
-
-</div>
 
 </body>
+
 </html>

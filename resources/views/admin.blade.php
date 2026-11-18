@@ -623,6 +623,8 @@
 
         </div>
 
+
+
         <!-- STATISTIC CARDS -->
         <section class="cards">
 
@@ -712,6 +714,12 @@
 
                         @forelse($bookings as $booking)
 
+                        @php
+                        $latestAssignment = $booking->assignments
+                        ->sortByDesc('id')
+                        ->first();
+                        @endphp
+
                         <tr>
 
                             <td>
@@ -738,9 +746,16 @@
                                 {{ substr($booking->booking_time, 0, 5) }}
                             </td>
 
+
                             <td>
+                                @if($latestAssignment)
+                                {{ $latestAssignment->therapist->name ?? 'Belum ditugaskan' }}
+                                @else
                                 {{ $booking->therapist->name ?? 'Belum ditugaskan' }}
+                                @endif
                             </td>
+
+
 
                             <td>
                                 {{ $booking->place === 'home' ? 'Home Service' : 'Klinik' }}
@@ -770,7 +785,25 @@
                                 {{ $booking->notes ?? '-' }}
                             </td>
 
+
                             <td>
+                                @if($latestAssignment)
+                                @if($latestAssignment->status === 'pending')
+                                <span class="status status-pending">Menunggu</span>
+
+                                @elseif($latestAssignment->status === 'accepted')
+                                <span class="status status-approved">Diterima</span>
+
+                                @elseif($latestAssignment->status === 'rejected')
+                                <span class="status status-rejected">Ditolak</span>
+
+                                @elseif($latestAssignment->status === 'completed')
+                                <span class="status status-completed">Selesai</span>
+
+                                @elseif($latestAssignment->status === 'reassigned')
+                                <span class="status status-pending">Ditugaskan Ulang</span>
+                                @endif
+                                @else
                                 @if($booking->status === 'pending')
                                 <span class="status status-pending">Pending</span>
                                 @elseif($booking->status === 'approved')
@@ -780,7 +813,9 @@
                                 @elseif($booking->status === 'completed')
                                 <span class="status status-completed">Completed</span>
                                 @endif
+                                @endif
                             </td>
+
 
                             <!-- ASSIGN THERAPIST -->
                             <td>

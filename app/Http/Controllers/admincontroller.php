@@ -6,38 +6,43 @@ use App\Models\Booking;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-
+use App\Models\BookingAssignment;
 class AdminController extends Controller
 {
+
     public function index()
     {
-        // Mengambil semua data booking
-        $bookings = Booking::with(['user', 'therapist'])
+        $bookings = Booking::with([
+            'user',
+            'therapist',
+            'assignments.therapist'
+        ])
             ->latest()
             ->get();
 
-        // Dropdown penugasan hanya menampilkan terapis Aktif
+        // Mengambil semua terapis, baik ON maupun OFF
         $therapists = User::where('role', 'therapist')
-            ->where('is_available', true)
             ->get();
 
         return view('admin', compact('bookings', 'therapists'));
     }
 
+
+
     public function therapistSchedules(Request $request)
     {
-        // Validasi format bulan, misalnya 2026-11
+        // Validasi bulan
         $validated = $request->validate([
             'month' => 'nullable|date_format:Y-m',
         ]);
 
-        // Bulan yang sedang ditampilkan
+        // Bulan yang ditampilkan
         $currentMonth = Carbon::createFromFormat(
             'Y-m',
             $validated['month'] ?? now()->format('Y-m')
         )->startOfMonth();
 
-        // Rentang tanggal kalender, termasuk tanggal bulan sebelumnya/berikutnya
+        // Rentang kalender
         $calendarStart = $currentMonth->copy()
             ->startOfWeek(Carbon::MONDAY);
 
@@ -45,25 +50,36 @@ class AdminController extends Controller
             ->endOfMonth()
             ->endOfWeek(Carbon::SUNDAY);
 
-        // Ambil semua terapis, termasuk yang Nonaktif
+        // Mengambil semua terapis, baik ON maupun OFF
         $therapists = User::where('role', 'therapist')
             ->orderBy('name')
             ->get();
 
-        // Ambil booking yang sudah memiliki terapis pada rentang kalender
-        $bookings = Booking::with(['user', 'therapist'])
-            ->whereNotNull('therapist_id')
-            ->whereBetween('booking_date', [
-                $calendarStart->toDateString(),
-                $calendarEnd->toDateString(),
-            ])
-            ->orderBy('booking_time')
+        // Mengambil pekerjaan yang sudah diterima atau selesai
+        $assignments = BookingAssignment::with([
+            'booking.user',
+            'therapist'
+        ])
+            ->whereIn('status', ['accepted', 'completed'])
+            ->whereHas('booking', function ($query) use ($calendarStart, $calendarEnd) {
+                $query->whereBetween('booking_date', [
+                    $calendarStart->toDateString(),
+                    $calendarEnd->toDateString(),
+                ]);
+            })
             ->get()
-            ->groupBy(function ($booking) {
-                return Carbon::parse($booking->booking_date)->format('Y-m-d');
+            // Urutkan berdasarkan tanggal dan jam
+            ->sortBy(function ($assignment) {
+                return $assignment->booking->booking_date . ' ' .
+                    $assignment->booking->booking_time;
+            })
+            ->groupBy(function ($assignment) {
+                return Carbon::parse(
+                    $assignment->booking->booking_date
+                )->format('Y-m-d');
             });
 
-        // Membuat daftar tanggal untuk ditampilkan pada kalender
+        // Membuat daftar tanggal kalender
         $calendarDays = collect();
 
         $date = $calendarStart->copy();
@@ -73,6 +89,7 @@ class AdminController extends Controller
             $date->addDay();
         }
 
+        // Navigasi bulan
         $previousMonth = $currentMonth->copy()
             ->subMonth()
             ->format('Y-m');
@@ -83,7 +100,7 @@ class AdminController extends Controller
 
         return view('therapist-schedules', compact(
             'therapists',
-            'bookings',
+            'assignments',
             'calendarDays',
             'currentMonth',
             'previousMonth',
