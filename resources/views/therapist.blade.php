@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 
@@ -62,7 +61,7 @@
 
         .sidebar a:hover,
         .sidebar a.active {
-            background: rgba(255,255,255,.13);
+            background: rgba(255, 255, 255, .13);
             color: white;
         }
 
@@ -79,7 +78,7 @@
         }
 
         .logout:hover {
-            background: rgba(255,255,255,.13);
+            background: rgba(255, 255, 255, .13);
         }
 
         /* MAIN */
@@ -166,7 +165,7 @@
             background: white;
             border: 1px solid #edf0ed;
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,.035);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .035);
         }
 
         .card h3 {
@@ -208,7 +207,7 @@
             background: white;
             border: 1px solid #edf0ed;
             border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,.035);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .035);
         }
 
         .calendar-top {
@@ -451,10 +450,166 @@
             border-radius: 50%;
         }
 
-        .legend-pending { background: #f59e0b; }
-        .legend-approved { background: #16a34a; }
-        .legend-completed { background: #2563eb; }
-        .legend-rejected { background: #dc2626; }
+        .legend-pending {
+            background: #f59e0b;
+        }
+
+        .legend-approved {
+            background: #16a34a;
+        }
+
+        .legend-completed {
+            background: #2563eb;
+        }
+
+        .legend-rejected {
+            background: #dc2626;
+        }
+
+
+
+        /* INCOMING ASSIGNMENTS */
+
+        .incoming-section {
+            margin-bottom: 25px;
+        }
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .section-heading h2 {
+            color: #24442f;
+            font-size: 19px;
+        }
+
+        .incoming-count {
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #fef3c7;
+            color: #a16207;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .incoming-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .incoming-card {
+            padding: 20px;
+            background: white;
+            border: 1px solid #edf0ed;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .035);
+        }
+
+        .incoming-card h3 {
+            color: #24442f;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .incoming-info {
+            color: #737d74;
+            font-size: 11px;
+            line-height: 2;
+        }
+
+        .assignment-status {
+            display: inline-block;
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .assignment-status.pending {
+            background: #fef3c7;
+            color: #a16207;
+        }
+
+        .assignment-status.rejected {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .assignment-actions {
+            display: flex;
+            gap: 9px;
+            margin-top: 15px;
+        }
+
+        .btn-accept,
+        .btn-reject {
+            flex: 1;
+            padding: 9px;
+            border: none;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-accept {
+            background: #24442f;
+            color: white;
+        }
+
+        .btn-reject {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .reject-reason {
+            width: 100%;
+            margin-top: 12px;
+            padding: 10px;
+            border: 1px solid #e5eae5;
+            border-radius: 7px;
+            font-family: inherit;
+            font-size: 11px;
+            resize: vertical;
+        }
+
+        .reject-reason:focus {
+            outline: none;
+            border-color: #24442f;
+        }
+
+        .rejection-info {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 7px;
+            background: #fff1f2;
+            color: #991b1b;
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .empty-incoming {
+            padding: 25px;
+            background: white;
+            border: 1px solid #edf0ed;
+            border-radius: 12px;
+            color: #858b86;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        @media (max-width: 700px) {
+            .incoming-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
 
         /* RESPONSIVE */
 
@@ -555,10 +710,10 @@
     </style>
 </head>
 
+
 <body>
 
     <!-- SIDEBAR -->
-
     <aside class="sidebar">
 
         <h2 class="logo">CLAIRE</h2>
@@ -566,23 +721,20 @@
         <ul>
             <li>
                 <a href="{{ route('therapist.dashboard') }}" class="active">
-                    Schedul
+                    My Schedule
                 </a>
             </li>
 
             <li>
                 <a href="">
-                    chat
+                    Chat
                 </a>
             </li>
 
             <li>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
-
-                    <button type="submit" class="logout">
-                        Logout
-                    </button>
+                    <button type="submit" class="logout">Logout</button>
                 </form>
             </li>
         </ul>
@@ -591,11 +743,9 @@
 
 
     <!-- MAIN CONTENT -->
-
     <main class="main">
 
         <!-- HEADER -->
-
         <div class="header">
 
             <div>
@@ -606,13 +756,9 @@
             <div class="availability-box">
 
                 @if(Auth::user()->is_available)
-                    <span class="availability active">
-                        ● Aktif
-                    </span>
+                <span class="availability active">● Aktif</span>
                 @else
-                    <span class="availability inactive">
-                        ● Nonaktif
-                    </span>
+                <span class="availability inactive">● Nonaktif</span>
                 @endif
 
                 <form action="{{ route('therapist.toggleAvailability') }}" method="POST">
@@ -629,36 +775,42 @@
 
 
         <!-- SESSION MESSAGE -->
-
         @if(session('success'))
-            <div class="alert success">
-                {{ session('success') }}
-            </div>
+        <div class="alert success">
+            {{ session('success') }}
+        </div>
         @endif
 
         @if(session('error'))
-            <div class="alert error">
-                {{ session('error') }}
-            </div>
+        <div class="alert error">
+            {{ session('error') }}
+        </div>
+        @endif
+
+        @if($errors->any())
+        <div class="alert error">
+            @foreach($errors->all() as $error)
+            <div>{{ $error }}</div>
+            @endforeach
+        </div>
         @endif
 
 
-        <!-- STATISTIC CARDS -->
-
+        <!-- STATISTICS -->
         <section class="cards">
 
             <div class="card">
-                <h3>Total Booking</h3>
+                <h3>Total Penugasan</h3>
                 <h2>{{ $totalBooking }}</h2>
             </div>
 
             <div class="card">
-                <h3>Menunggu</h3>
+                <h3>Menunggu Respons</h3>
                 <h2>{{ $pendingBooking }}</h2>
             </div>
 
             <div class="card">
-                <h3>Disetujui</h3>
+                <h3>Diterima</h3>
                 <h2>{{ $approvedBooking }}</h2>
             </div>
 
@@ -670,13 +822,161 @@
         </section>
 
 
-        <!-- MY BOOKINGS CALENDAR -->
+        <!-- INCOMING ASSIGNMENTS -->
+        <section class="incoming-section">
 
+            <div class="section-heading">
+
+                <h2>Pekerjaan Masuk</h2>
+
+                <span class="incoming-count">
+                    {{ $incomingAssignments->where('status', 'pending')->count() }}
+                    Menunggu Respons
+                </span>
+
+            </div>
+
+
+            @if($incomingAssignments->isEmpty())
+
+            <div class="empty-incoming">
+                Belum ada pekerjaan masuk.
+            </div>
+
+            @else
+
+            <div class="incoming-list">
+
+                @foreach($incomingAssignments as $assignment)
+
+                @php
+                $booking = $assignment->booking;
+                @endphp
+
+                <div class="incoming-card">
+
+                    @if($assignment->status === 'pending')
+
+                    <span class="assignment-status pending">
+                        Menunggu Respons
+                    </span>
+
+                    @elseif($assignment->status === 'rejected')
+
+                    <span class="assignment-status rejected">
+                        Pekerjaan Ditolak
+                    </span>
+
+                    @endif
+
+
+                    <h3>{{ $booking->treatment }}</h3>
+
+                    <div class="incoming-info">
+
+                        <strong>Pelanggan:</strong>
+                        {{ $booking->user->name ?? 'Customer' }}
+                        <br>
+
+                        <strong>Tanggal:</strong>
+                        {{ \Carbon\Carbon::parse($booking->booking_date)->translatedFormat('d F Y') }}
+                        <br>
+
+                        <strong>Jam:</strong>
+                        {{ substr($booking->booking_time, 0, 5) }} WIB
+                        <br>
+
+                        <strong>Lokasi:</strong>
+                        {{ $booking->place === 'home' ? 'Home Service' : 'Klinik' }}
+                        <br>
+
+                        <strong>Telepon:</strong>
+                        {{ $booking->phone ?? '-' }}
+
+                    </div>
+
+
+                    @if($assignment->status === 'pending')
+
+                    <!-- ACCEPT -->
+                    <div class="assignment-actions">
+
+                        <form
+                            action="{{ route('therapist.assignment.accept', $assignment->id) }}"
+                            method="POST"
+                            style="flex: 1;"
+                            onsubmit="return confirm('Apakah kamu yakin menerima pekerjaan ini?')">
+
+                            @csrf
+
+                            <button type="submit" class="btn-accept" style="width:100%;">
+                                Terima Pekerjaan
+                            </button>
+
+                        </form>
+
+                    </div>
+
+
+                    <!-- REJECT -->
+                    <form
+                        action="{{ route('therapist.assignment.reject', $assignment->id) }}"
+                        method="POST">
+
+                        @csrf
+
+                        <textarea
+                            name="rejection_reason"
+                            class="reject-reason"
+                            rows="2"
+                            placeholder="Tuliskan alasan penolakan..."
+                            required></textarea>
+
+                        <div class="assignment-actions">
+
+                            <button
+                                type="submit"
+                                class="btn-reject"
+                                onclick="return confirm('Apakah kamu yakin menolak pekerjaan ini?')">
+
+                                Tolak Pekerjaan
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                    @elseif($assignment->status === 'rejected')
+
+                    <div class="rejection-info">
+
+                        <strong>Alasan Penolakan:</strong>
+                        <br>
+
+                        {{ $assignment->rejection_reason ?? 'Tidak ada alasan.' }}
+
+                    </div>
+
+                    @endif
+
+                </div>
+
+                @endforeach
+
+            </div>
+
+            @endif
+
+        </section>
+
+
+        <!-- MY SCHEDULE CALENDAR -->
         <section class="calendar-card" id="bookings">
 
             <div class="calendar-top">
 
-                <h2>Jadwal Treatment Saya</h2>
+                <h2>My Schedule</h2>
 
                 <div class="month-navigation">
 
@@ -697,193 +997,186 @@
             </div>
 
 
-            <!-- CALENDAR GRID -->
-
             <div class="calendar-grid">
 
-                <!-- WEEKDAY -->
-
+                <!-- WEEKDAYS -->
                 @foreach(['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'] as $weekday)
 
-                    <div class="weekday">
-                        {{ $weekday }}
-                    </div>
+                <div class="weekday">
+                    {{ $weekday }}
+                </div>
 
                 @endforeach
 
 
                 <!-- CALENDAR DAYS -->
-
                 @foreach($calendarDays as $day)
 
+                @php
+                $dateKey = $day->format('Y-m-d');
+
+                $dayAssignments = $calendarAssignments->get($dateKey, collect());
+
+                $isCurrentMonth = $day->month === $currentMonth->month
+                && $day->year === $currentMonth->year;
+
+                $isToday = $day->isToday();
+                @endphp
+
+
+                <div class="calendar-day {{ $isCurrentMonth ? '' : 'other-month' }}">
+
+                    <div class="day-number {{ $isToday ? 'today' : '' }}">
+                        {{ $day->format('d') }}
+                    </div>
+
+
+                    @forelse($dayAssignments as $assignment)
+
                     @php
-                        $dateKey = $day->format('Y-m-d');
-
-                        $dayBookings = $bookings->get($dateKey, collect());
-
-                        $isCurrentMonth = $day->month === $currentMonth->month;
-
-                        $isToday = $day->isToday();
+                    $booking = $assignment->booking;
                     @endphp
 
-                    <div class="calendar-day {{ $isCurrentMonth ? '' : 'other-month' }}">
+                    <div class="booking-event">
 
-                        <div class="day-number {{ $isToday ? 'today' : '' }}">
-                            {{ $day->format('d') }}
+                        <div class="event-time">
+                            {{ substr($booking->booking_time, 0, 5) }}
                         </div>
 
+                        <div class="event-treatment">
+                            {{ $booking->treatment }}
+                        </div>
 
-                        <!-- BOOKINGS ON THIS DATE -->
+                        <div class="event-customer">
+                            {{ $booking->user->name ?? 'Customer' }}
+                        </div>
 
-                        @forelse($dayBookings as $booking)
-
-                            <div class="booking-event">
-
-                                <div class="event-time">
-                                    {{ substr($booking->booking_time, 0, 5) }}
-                                </div>
-
-                                <div class="event-treatment">
-                                    {{ $booking->treatment }}
-                                </div>
-
-                                <div class="event-customer">
-                                    {{ $booking->user->name ?? 'Customer' }}
-                                </div>
-
-                                <span class="event-status {{ $booking->status }}">
-                                    {{ ucfirst($booking->status) }}
-                                </span>
+                        <span class="event-status {{ $assignment->status }}">
+                            {{ $assignment->status === 'accepted' ? 'Diterima' : 'Selesai' }}
+                        </span>
 
 
-                                <!-- BOOKING DETAILS -->
+                        <!-- BOOKING DETAILS -->
+                        <details class="booking-details">
 
-                                <details class="booking-details">
+                            <summary>Lihat Detail</summary>
 
-                                    <summary>Lihat Detail</summary>
+                            <div class="details-content">
 
-                                    <div class="details-content">
+                                <strong>Customer:</strong>
+                                {{ $booking->user->name ?? 'Customer' }}
+                                <br>
 
-                                        <strong>Customer:</strong>
-                                        {{ $booking->user->name ?? 'Customer' }}
-                                        <br>
+                                <strong>Gender:</strong>
+                                {{ $booking->gender ?? '-' }}
+                                <br>
 
-                                        <strong>Gender:</strong>
-                                        {{ $booking->gender ?? '-' }}
-                                        <br>
+                                <strong>Telepon:</strong>
+                                {{ $booking->phone ?? '-' }}
+                                <br>
 
-                                        <strong>Telepon:</strong>
-                                        {{ $booking->phone ?? '-' }}
-                                        <br>
+                                <strong>Treatment:</strong>
+                                {{ $booking->treatment }}
+                                <br>
 
-                                        <strong>Treatment:</strong>
-                                        {{ $booking->treatment }}
-                                        <br>
+                                <strong>Tanggal:</strong>
+                                {{ \Carbon\Carbon::parse($booking->booking_date)->translatedFormat('d F Y') }}
+                                <br>
 
-                                        <strong>Waktu:</strong>
-                                        {{ substr($booking->booking_time, 0, 5) }}
-                                        <br>
+                                <strong>Waktu:</strong>
+                                {{ substr($booking->booking_time, 0, 5) }} WIB
+                                <br>
 
-                                        <strong>Lokasi:</strong>
-                                        {{ $booking->place === 'home' ? 'Home Service' : 'Klinik' }}
-                                        <br>
+                                <strong>Lokasi:</strong>
+                                {{ $booking->place === 'home' ? 'Home Service' : 'Klinik' }}
+                                <br>
 
-                                        @if($booking->place === 'home')
-                                            <strong>Alamat:</strong>
-                                            {{ $booking->address ?? '-' }}
-                                            <br>
-                                        @endif
+                                @if($booking->place === 'home')
 
-                                        <strong>Pembayaran:</strong>
-                                        {{ $booking->payment_method ?? '-' }}
-                                        <br>
-
-                                        <strong>Harga Treatment:</strong>
-                                        Rp{{ number_format($booking->price ?? 0, 0, ',', '.') }}
-                                        <br>
-
-                                        <strong>Biaya Layanan:</strong>
-                                        Rp{{ number_format($booking->service_fee ?? 0, 0, ',', '.') }}
-                                        <br>
-
-                                        <strong>Total:</strong>
-                                        Rp{{ number_format($booking->total_price ?? 0, 0, ',', '.') }}
-                                        <br>
-
-                                        <strong>Catatan:</strong>
-                                        {{ $booking->notes ?: '-' }}
-
-                                    </div>
-
-                                </details>
-
-
-                                <!-- COMPLETE BOOKING -->
-
-                                @if($booking->status === 'approved')
-
-                                    <form
-                                        action="{{ route('therapist.booking.complete', $booking->id) }}"
-                                        method="POST">
-
-                                        @csrf
-
-                                        <button
-                                            type="submit"
-                                            class="btn-complete"
-                                            onclick="return confirm('Apakah treatment ini sudah selesai?')">
-
-                                            Tandai Selesai
-
-                                        </button>
-
-                                    </form>
-
-                                @elseif($booking->status === 'completed')
-
-                                    <span class="already-completed">
-                                        ✓ Sudah Selesai
-                                    </span>
+                                <strong>Alamat:</strong>
+                                {{ $booking->address ?? '-' }}
+                                <br>
 
                                 @endif
 
+                                <strong>Pembayaran:</strong>
+                                {{ $booking->payment_method ?? '-' }}
+                                <br>
+
+                                <strong>Harga Treatment:</strong>
+                                Rp{{ number_format($booking->price ?? 0, 0, ',', '.') }}
+                                <br>
+
+                                <strong>Biaya Layanan:</strong>
+                                Rp{{ number_format($booking->service_fee ?? 0, 0, ',', '.') }}
+                                <br>
+
+                                <strong>Total:</strong>
+                                Rp{{ number_format($booking->total_price ?? 0, 0, ',', '.') }}
+                                <br>
+
+                                <strong>Catatan:</strong>
+                                {{ $booking->notes ?: '-' }}
+
                             </div>
 
-                        @empty
+                        </details>
 
-                            <span class="empty-day">-</span>
 
-                        @endforelse
+                        <!-- COMPLETE BOOKING -->
+                        @if($assignment->status === 'accepted')
+
+                        <form
+                            action="{{ route('therapist.booking.complete', $booking->id) }}"
+                            method="POST">
+
+                            @csrf
+
+                            <button
+                                type="submit"
+                                class="btn-complete"
+                                onclick="return confirm('Apakah treatment ini sudah selesai?')">
+
+                                Tandai Selesai
+
+                            </button>
+
+                        </form>
+
+                        @elseif($assignment->status === 'completed')
+
+                        <span class="already-completed">
+                            ✓ Treatment Selesai
+                        </span>
+
+                        @endif
 
                     </div>
+
+                    @empty
+
+                    <span class="empty-day">-</span>
+
+                    @endforelse
+
+                </div>
 
                 @endforeach
 
             </div>
 
 
-            <!-- STATUS LEGEND -->
-
+            <!-- LEGEND -->
             <div class="calendar-legend">
 
                 <div class="legend-item">
-                    <span class="legend-dot legend-pending"></span>
-                    Menunggu
-                </div>
-
-                <div class="legend-item">
                     <span class="legend-dot legend-approved"></span>
-                    Disetujui
+                    Diterima
                 </div>
 
                 <div class="legend-item">
                     <span class="legend-dot legend-completed"></span>
                     Selesai
-                </div>
-
-                <div class="legend-item">
-                    <span class="legend-dot legend-rejected"></span>
-                    Ditolak
                 </div>
 
             </div>
@@ -893,4 +1186,8 @@
     </main>
 
 </body>
+
+</html>
+
+
 </html>

@@ -248,6 +248,8 @@
         </a>
     </div>
 
+    
+
     <div class="calendar-card">
 
         <div class="calendar-header">
@@ -334,30 +336,7 @@
 
     </div>
 
-    <div class="therapist-list">
-
-        <h3>Daftar Terapis</h3>
-
-        <div class="therapist-items">
-
-            @forelse($therapists as $therapist)
-
-                <div class="therapist-item">
-                    {{ $therapist->name }}
-
-                    <span class="therapist-status {{ $therapist->is_available ? 'active' : 'inactive' }}">
-                        {{ $therapist->is_available ? 'Aktif' : 'Nonaktif' }}
-                    </span>
-                </div>
-
-            @empty
-
-                <p>Belum ada akun terapis.</p>
-
-            @endforelse
-
-        </div>
-
+   
     </div>
 
 </div>

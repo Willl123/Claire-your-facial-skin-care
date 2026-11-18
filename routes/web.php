@@ -71,6 +71,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::post('/booking/{id}/assign-therapist', [BookingController::class, 'assignTherapist'])
         ->name('booking.assignTherapist');
+
+    Route::middleware(['auth', 'role:admin'])->group(function () {
+
+        Route::post(
+            '/booking/{id}/assign-therapist',
+            [BookingController::class, 'assignTherapist']
+        )->name('booking.assignTherapist');
+    });
 });
 
 
@@ -138,3 +146,13 @@ Route::middleware(['auth', 'role:therapist'])->group(function () {
     Route::post('/therapist/toggle-availability', [TherapistController::class, 'toggleAvailability'])
         ->name('therapist.toggleAvailability');
 });
+
+Route::post(
+    '/therapist/assignment/{id}/accept',
+    [TherapistController::class, 'acceptAssignment']
+)->name('therapist.assignment.accept');
+
+Route::post(
+    '/therapist/assignment/{id}/reject',
+    [TherapistController::class, 'rejectAssignment']
+)->name('therapist.assignment.reject');

@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use App\Models\BookingAssignment;
+use Illuminate\Support\Facades\DB;
+
 
 class BookingController extends Controller
 {
@@ -149,22 +152,109 @@ class BookingController extends Controller
     }
 
     // Admin menugaskan terapis aktif
+
     public function assignTherapist(Request $request, $id)
     {
         $request->validate([
             'therapist_id' => 'required|exists:users,id',
         ]);
 
-        $therapist = User::where('id', $request->therapist_id)
-            ->where('role', 'therapist')
-            ->where('is_available', true)
-            ->firstOrFail();
+        DB::transaction(function () use ($request, $id) {
 
-        $booking = Booking::findOrFail($id);
+            // Mengunci data booking agar tidak diproses bersamaan
+            $booking = Booking::where('id', $id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $booking->therapist_id = $therapist->id;
-        $booking->save();
+            // Mengunci data terapis untuk mencegah penugasan bersamaan
+            $therapist = User::where('id', $request->therapist_id)
+                ->where('role', 'therapist')
+                ->lockForUpdate()
+                ->first();
 
-        return back()->with('success', 'Terapis berhasil ditugaskan.');
+            if (!$therapist || !$therapist->is_available) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'therapist_id' => 'Terapis tidak tersedia atau sedang nonaktif.',
+                ]);
+            }
+
+            // Mencegah penugasan aktif yang sama dibuat berulang
+            $sameAssignment = BookingAssignment::where('booking_id', $booking->id)
+                ->where('therapist_id', $therapist->id)
+                ->whereIn('status', ['pending', 'accepted'])
+                ->exists();
+
+            if ($sameAssignment) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'therapist_id' => 'Pekerjaan ini sudah ditugaskan kepada terapis tersebut.',
+                ]);
+            }
+
+            // Menghitung waktu pekerjaan baru: 2 jam
+            $newStart = Carbon::parse(
+                $booking->booking_date . ' ' . $booking->booking_time
+            );
+
+            $newEnd = $newStart->copy()->addHours(2);
+
+            // Mengambil penugasan aktif terapis pada tanggal yang sama
+            $existingAssignments = BookingAssignment::with('booking')
+                ->where('therapist_id', $therapist->id)
+                ->whereIn('status', ['pending', 'accepted'])
+                ->whereHas('booking', function ($query) use ($booking) {
+                    $query->whereDate('booking_date', $booking->booking_date);
+                })
+                ->lockForUpdate()
+                ->get();
+
+            // Memeriksa apakah jadwal bertabrakan
+            foreach ($existingAssignments as $assignment) {
+
+                // Booking yang sedang ditugaskan tidak dihitung sebagai bentrok
+                if ($assignment->booking_id == $booking->id) {
+                    continue;
+                }
+
+                $existingStart = Carbon::parse(
+                    $assignment->booking->booking_date . ' ' .
+                        $assignment->booking->booking_time
+                );
+
+                $existingEnd = $existingStart->copy()->addHours(2);
+
+                // Memeriksa tabrakan waktu
+                if ($newStart->lt($existingEnd) && $existingStart->lt($newEnd)) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'therapist_id' =>
+                        'Terapis sudah memiliki jadwal pada waktu tersebut. Silakan pilih terapis lain atau jam berbeda.',
+                    ]);
+                }
+            }
+
+            // Menandai penugasan aktif sebelumnya sebagai digantikan
+            BookingAssignment::where('booking_id', $booking->id)
+                ->whereIn('status', ['pending', 'accepted'])
+                ->update([
+                    'status' => 'reassigned',
+                    'updated_at' => now(),
+                ]);
+
+            // Membuat riwayat penugasan baru
+            BookingAssignment::create([
+                'booking_id' => $booking->id,
+                'therapist_id' => $therapist->id,
+                'status' => 'pending',
+            ]);
+
+            // Mempertahankan relasi therapist_id pada tabel bookings
+            $booking->update([
+                'therapist_id' => $therapist->id,
+            ]);
+        });
+
+        return back()->with(
+            'success',
+            'Pekerjaan berhasil diberikan kepada terapis. Menunggu konfirmasi terapis.'
+        );
     }
 }

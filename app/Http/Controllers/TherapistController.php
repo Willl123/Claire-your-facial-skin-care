@@ -6,128 +6,101 @@ use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Models\BookingAssignment;
+use Illuminate\Support\Facades\DB;
+
 
 class TherapistController extends Controller
 {
     /**
      * Dashboard dan kalender booking terapis
      */
+
     public function index(Request $request)
     {
-        // ID terapis yang sedang login
         $therapistId = Auth::id();
 
-        // Mengambil bulan dari URL, contoh: ?month=2026-11
+        // Mengatur bulan kalender
         $month = $request->query('month', now()->format('Y-m'));
 
-        // Memastikan format bulan benar
-        if (
-            !preg_match('/^\d{4}-\d{2}$/', $month) ||
-            !checkdate(
-                (int) substr($month, 5, 2),
-                1,
-                (int) substr($month, 0, 4)
-            )
-        ) {
+        if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month)) {
             $month = now()->format('Y-m');
         }
 
-        // Menentukan bulan kalender
-        $currentMonth = Carbon::createFromFormat('!Y-m', $month);
+        $currentMonth = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
 
-        // Awal dan akhir kalender (Senin sampai Minggu)
-        $calendarStart = $currentMonth->copy()
-            ->startOfWeek(Carbon::MONDAY);
+        // Rentang kalender dari Senin sampai Minggu
+        $calendarStart = $currentMonth->copy()->startOfWeek(Carbon::MONDAY);
+        $calendarEnd = $currentMonth->copy()->endOfMonth()->endOfWeek(Carbon::SUNDAY);
 
-        $calendarEnd = $currentMonth->copy()
-            ->endOfMonth()
-            ->endOfWeek(Carbon::SUNDAY);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Mengambil booking milik terapis yang sedang login
-        |--------------------------------------------------------------------------
-        */
-
-        $therapistBookings = Booking::with('user')
+        // Pekerjaan masuk: menunggu respons dan riwayat penolakan
+        $incomingAssignments = BookingAssignment::with(['booking.user'])
             ->where('therapist_id', $therapistId)
-            ->whereBetween('booking_date', [
-                $calendarStart->toDateString(),
-                $calendarEnd->toDateString()
-            ])
-            ->orderBy('booking_date', 'asc')
-            ->orderBy('booking_time', 'asc')
+            ->whereIn('status', ['pending', 'rejected'])
+            ->whereHas('booking')
+            ->latest()
             ->get();
 
-        // Mengelompokkan booking berdasarkan tanggal
-        $bookings = $therapistBookings->groupBy(function ($booking) {
-            return Carbon::parse($booking->booking_date)->format('Y-m-d');
-        });
+        // Jadwal kalender: hanya pekerjaan yang diterima atau selesai
+        $calendarAssignments = BookingAssignment::with(['booking.user'])
+            ->where('therapist_id', $therapistId)
+            ->whereIn('status', ['accepted', 'completed'])
+            ->whereHas('booking', function ($query) use ($calendarStart, $calendarEnd) {
+                $query->whereBetween('booking_date', [
+                    $calendarStart->toDateString(),
+                    $calendarEnd->toDateString(),
+                ]);
+            })
+            ->get()
+            ->groupBy(function ($assignment) {
+                return Carbon::parse($assignment->booking->booking_date)->format('Y-m-d');
+            });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Menghitung statistik seluruh booking milik terapis
-        |--------------------------------------------------------------------------
-        */
+        // Membuat daftar tanggal kalender
+        $calendarDays = collect();
 
-        $totalBooking = Booking::where('therapist_id', $therapistId)
+        $totalDays = $calendarStart->diffInDays($calendarEnd) + 1;
+
+        for ($i = 0; $i < $totalDays; $i++) {
+            $calendarDays->push($calendarStart->copy()->addDays($i));
+        }
+
+        // Statistik penugasan terapis
+        $totalBooking = BookingAssignment::where('therapist_id', $therapistId)
+            ->whereIn('status', ['pending', 'accepted', 'completed', 'rejected'])
             ->count();
 
-        $pendingBooking = Booking::where('therapist_id', $therapistId)
+        $pendingBooking = BookingAssignment::where('therapist_id', $therapistId)
             ->where('status', 'pending')
             ->count();
 
-        $approvedBooking = Booking::where('therapist_id', $therapistId)
-            ->where('status', 'approved')
+        $approvedBooking = BookingAssignment::where('therapist_id', $therapistId)
+            ->where('status', 'accepted')
             ->count();
 
-        $completedBooking = Booking::where('therapist_id', $therapistId)
+        $completedBooking = BookingAssignment::where('therapist_id', $therapistId)
             ->where('status', 'completed')
             ->count();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Membuat tanggal-tanggal kalender
-        |--------------------------------------------------------------------------
-        */
+        // Navigasi kalender
+        $previousMonth = $currentMonth->copy()->subMonth()->format('Y-m');
+        $nextMonth = $currentMonth->copy()->addMonth()->format('Y-m');
 
-        $calendarDays = [];
-
-        $date = $calendarStart->copy();
-
-        while ($date->lte($calendarEnd)) {
-            $calendarDays[] = $date->copy();
-
-            $date->addDay();
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Navigasi bulan sebelumnya dan berikutnya
-        |--------------------------------------------------------------------------
-        */
-
-        $previousMonth = $currentMonth->copy()
-            ->subMonth()
-            ->format('Y-m');
-
-        $nextMonth = $currentMonth->copy()
-            ->addMonth()
-            ->format('Y-m');
-
-        // Mengirim data ke halaman therapist.blade.php
         return view('therapist', compact(
-            'bookings',
-            'totalBooking',
-            'pendingBooking',
-            'approvedBooking',
-            'completedBooking',
+            'incomingAssignments',
+            'calendarAssignments',
             'calendarDays',
             'currentMonth',
             'previousMonth',
-            'nextMonth'
+            'nextMonth',
+            'totalBooking',
+            'pendingBooking',
+            'approvedBooking',
+            'completedBooking'
         ));
     }
+
+
 
 
     /**
@@ -135,29 +108,39 @@ class TherapistController extends Controller
      */
     public function complete($id)
     {
-        // Memastikan booking memang ditugaskan kepada terapis login
-        $booking = Booking::where('therapist_id', Auth::id())
-            ->where('id', $id)
-            ->firstOrFail();
+        DB::transaction(function () use ($id) {
 
-        // Booking harus berstatus approved
-        if ($booking->status !== 'approved') {
-            return back()->with(
-                'error',
-                'Booking harus disetujui terlebih dahulu sebelum ditandai selesai.'
-            );
-        }
+            // Memastikan booking ditugaskan kepada terapis yang login
+            $booking = Booking::where('therapist_id', Auth::id())
+                ->where('id', $id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        // Mengubah status booking menjadi completed
-        $booking->update([
-            'status' => 'completed'
-        ]);
+            // Memastikan penugasan berstatus accepted
+            $assignment = BookingAssignment::where('booking_id', $booking->id)
+                ->where('therapist_id', Auth::id())
+                ->where('status', 'accepted')
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            // Mengubah status penugasan menjadi completed
+            $assignment->update([
+                'status' => 'completed',
+                'responded_at' => now(),
+            ]);
+
+            // Mengubah status booking menjadi completed
+            $booking->update([
+                'status' => 'completed',
+            ]);
+        });
 
         return back()->with(
             'success',
             'Treatment berhasil ditandai selesai.'
         );
     }
+
 
 
     /**
@@ -181,6 +164,67 @@ class TherapistController extends Controller
             $therapist->is_available
                 ? 'Status berhasil diubah menjadi Aktif.'
                 : 'Status berhasil diubah menjadi Nonaktif.'
+        );
+    }
+
+
+    public function acceptAssignment($id)
+    {
+        DB::transaction(function () use ($id) {
+
+            $assignment = BookingAssignment::where('id', $id)
+                ->where('therapist_id', Auth::id())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($assignment->status !== 'pending') {
+                abort(403, 'Pekerjaan ini sudah tidak menunggu respons.');
+            }
+
+            $assignment->update([
+                'status' => 'accepted',
+                'responded_at' => now(),
+            ]);
+        });
+
+        return back()->with(
+            'success',
+            'Pekerjaan berhasil diterima dan masuk ke jadwal kamu.'
+        );
+    }
+
+    public function rejectAssignment(Request $request, $id)
+    {
+        $request->validate([
+            'rejection_reason' => 'required|string|max:1000',
+        ]);
+
+        DB::transaction(function () use ($request, $id) {
+
+            $assignment = BookingAssignment::where('id', $id)
+                ->where('therapist_id', Auth::id())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($assignment->status !== 'pending') {
+                abort(403, 'Pekerjaan ini sudah tidak menunggu respons.');
+            }
+
+            $assignment->update([
+                'status' => 'rejected',
+                'rejection_reason' => $request->rejection_reason,
+                'responded_at' => now(),
+            ]);
+
+            // Lepaskan terapis dari booking agar admin bisa menugaskan ulang
+            $assignment->booking->update([
+                'therapist_id' => null,
+            ]);
+        });
+
+        return back()->with(
+            'success',
+            'Pekerjaan berhasil ditolak. Admin akan menerima informasi penolakan.'
         );
     }
 }

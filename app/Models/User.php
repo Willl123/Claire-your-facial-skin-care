@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['name', 'email', 'password', 'role', 'photo'])]
 #[Hidden(['password', 'remember_token'])]
@@ -36,7 +37,8 @@ class User extends Authenticatable
         return $this->hasMany(Booking::class, 'therapist_id');
     }
 
-    
-
-
+    public function bookingAssignments(): HasMany
+    {
+        return $this->hasMany(BookingAssignment::class, 'therapist_id');
+    }
 }
