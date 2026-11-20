@@ -572,7 +572,7 @@
                                 dan kulit lelah.</p>
                         </div>
                         <div class="pt-2">
-                            <a href="" target="_blank"
+                            <a href="/booking" target="_blank"
                                 class="block w-full bg-claireGreen text-white text-center text-xs tracking-widest font-medium uppercase py-3.5 rounded-full shadow-lg transition-all duration-300 hover:bg-claireDark">BOOKING</a>
                         </div>
                     </div>
@@ -639,7 +639,7 @@
                                 dan kulit kering dewasa.</p>
                         </div>
                         <div class="pt-2">
-                            <a href="" target="_blank"
+                            <a href="/booking" target="_blank"
                                 class="block w-full bg-claireGreen text-white text-center text-xs tracking-widest font-medium uppercase py-3.5 rounded-full shadow-lg transition-all duration-300 hover:bg-claireDark">BOOKING</a>
                         </div>
                     </div>
@@ -705,7 +705,7 @@
                                 dan kulit sangat berminyak.</p>
                         </div>
                         <div class="pt-2">
-                            <a href="" target="_blank"
+                            <a href="/booking" target="_blank"
                                 class="block w-full bg-claireGreen text-white text-center text-xs tracking-widest font-medium uppercase py-3.5 rounded-full shadow-lg transition-all duration-300 hover:bg-claireDark">BOOKING</a>
                         </div>
                     </div>
@@ -770,7 +770,7 @@
                                 mengelupas.</p>
                         </div>
                         <div class="pt-2">
-                            <a href="" target="_blank"
+                            <a href="/booking" target="_blank"
                                 class="block w-full bg-claireGreen text-white text-center text-xs tracking-widest font-medium uppercase py-3.5 rounded-full shadow-lg transition-all duration-300 hover:bg-claireDark">BOOKING</a>
                         </div>
                     </div>
@@ -835,7 +835,7 @@
                                 kulit tidak merata.</p>
                         </div>
                         <div class="pt-2">
-                            <a href="" target="_blank"
+                            <a href="/booking" target="_blank"
                                 class="block w-full bg-claireGreen text-white text-center text-xs tracking-widest font-medium uppercase py-3.5 rounded-full shadow-lg transition-all duration-300 hover:bg-claireDark">BOOKING</a>
                         </div>
                     </div>
