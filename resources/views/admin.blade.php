@@ -812,6 +812,9 @@
                 <h1>Admin Dashboard</h1>
                 <p>Selamat datang di dashboard CLAIRE</p>
                 <p class="today" id="todayText"></p>
+                <a href="{{ route('admin.profile') }}">
+                    Profil Saya
+                </a>
             </div>
 
             <div class="admin-label">
@@ -942,37 +945,37 @@
                         $filterStatus = 'pending';
 
                         if ($booking->status === 'rejected') {
-                            $statusLabel = 'Pesanan Ditolak';
-                            $statusClass = 'status-rejected';
-                            $filterStatus = 'rejected';
+                        $statusLabel = 'Pesanan Ditolak';
+                        $statusClass = 'status-rejected';
+                        $filterStatus = 'rejected';
                         } elseif ($booking->status === 'completed' || ($latestAssignment && $latestAssignment->status === 'completed')) {
-                            $statusLabel = 'Selesai';
-                            $statusClass = 'status-completed';
-                            $filterStatus = 'completed';
+                        $statusLabel = 'Selesai';
+                        $statusClass = 'status-completed';
+                        $filterStatus = 'completed';
                         } elseif ($latestAssignment) {
-                            if ($latestAssignment->status === 'pending' || $latestAssignment->status === 'reassigned') {
-                                $statusLabel = $latestAssignment->status === 'reassigned' ? 'Ditugaskan Ulang' : 'Menunggu Terapis';
-                                $statusClass = 'status-pending';
-                                $filterStatus = 'pending';
-                            } elseif ($latestAssignment->status === 'rejected') {
-                                $statusLabel = 'Ditolak Terapis';
-                                $statusClass = 'status-rejected';
-                                $filterStatus = 'rejected';
-                            } elseif ($latestAssignment->status === 'accepted') {
-                                if ($latestAssignment->admin_status === 'pending') {
-                                    $statusLabel = 'Menunggu Persetujuan Admin';
-                                    $statusClass = 'status-pending';
-                                    $filterStatus = 'pending';
-                                } elseif ($latestAssignment->admin_status === 'approved') {
-                                    $statusLabel = 'Disetujui';
-                                    $statusClass = 'status-approved';
-                                    $filterStatus = 'approved';
-                                } elseif ($latestAssignment->admin_status === 'rejected') {
-                                    $statusLabel = 'Ditolak Admin';
-                                    $statusClass = 'status-rejected';
-                                    $filterStatus = 'rejected';
-                                }
-                            }
+                        if ($latestAssignment->status === 'pending' || $latestAssignment->status === 'reassigned') {
+                        $statusLabel = $latestAssignment->status === 'reassigned' ? 'Ditugaskan Ulang' : 'Menunggu Terapis';
+                        $statusClass = 'status-pending';
+                        $filterStatus = 'pending';
+                        } elseif ($latestAssignment->status === 'rejected') {
+                        $statusLabel = 'Ditolak Terapis';
+                        $statusClass = 'status-rejected';
+                        $filterStatus = 'rejected';
+                        } elseif ($latestAssignment->status === 'accepted') {
+                        if ($latestAssignment->admin_status === 'pending') {
+                        $statusLabel = 'Menunggu Persetujuan Admin';
+                        $statusClass = 'status-pending';
+                        $filterStatus = 'pending';
+                        } elseif ($latestAssignment->admin_status === 'approved') {
+                        $statusLabel = 'Disetujui';
+                        $statusClass = 'status-approved';
+                        $filterStatus = 'approved';
+                        } elseif ($latestAssignment->admin_status === 'rejected') {
+                        $statusLabel = 'Ditolak Admin';
+                        $statusClass = 'status-rejected';
+                        $filterStatus = 'rejected';
+                        }
+                        }
                         }
                         @endphp
 
@@ -1144,33 +1147,33 @@
                                         <h3>Riwayat Penugasan Terapis</h3>
 
                                         @if($booking->assignments && $booking->assignments->count() > 0)
-                                            @foreach($booking->assignments->sortBy('id') as $assignmentHistory)
-                                                @php
-                                                    $historyStatusLabel = match($assignmentHistory->status) {
-                                                        'pending' => 'Menunggu respons terapis',
-                                                        'accepted' => $assignmentHistory->admin_status === 'approved' ? 'Disetujui admin' : ($assignmentHistory->admin_status === 'rejected' ? 'Ditolak admin' : 'Diterima, menunggu admin'),
-                                                        'rejected' => 'Terapis menolak tugas',
-                                                        'reassigned' => 'Penugasan ulang',
-                                                        'completed' => 'Selesai',
-                                                        default => ucfirst($assignmentHistory->status ?? 'Tidak diketahui'),
-                                                    };
-                                                    $historyStatusClass = $assignmentHistory->status === 'rejected' || $assignmentHistory->admin_status === 'rejected' ? 'status-rejected' : (($assignmentHistory->status === 'accepted' && $assignmentHistory->admin_status === 'approved') || $assignmentHistory->status === 'completed' ? 'status-approved' : 'status-pending');
-                                                @endphp
+                                        @foreach($booking->assignments->sortBy('id') as $assignmentHistory)
+                                        @php
+                                        $historyStatusLabel = match($assignmentHistory->status) {
+                                        'pending' => 'Menunggu respons terapis',
+                                        'accepted' => $assignmentHistory->admin_status === 'approved' ? 'Disetujui admin' : ($assignmentHistory->admin_status === 'rejected' ? 'Ditolak admin' : 'Diterima, menunggu admin'),
+                                        'rejected' => 'Terapis menolak tugas',
+                                        'reassigned' => 'Penugasan ulang',
+                                        'completed' => 'Selesai',
+                                        default => ucfirst($assignmentHistory->status ?? 'Tidak diketahui'),
+                                        };
+                                        $historyStatusClass = $assignmentHistory->status === 'rejected' || $assignmentHistory->admin_status === 'rejected' ? 'status-rejected' : (($assignmentHistory->status === 'accepted' && $assignmentHistory->admin_status === 'approved') || $assignmentHistory->status === 'completed' ? 'status-approved' : 'status-pending');
+                                        @endphp
 
 
-                                                <div class="detail-row" style="align-items:flex-start; gap:12px; padding:10px 0; border-bottom:1px solid var(--border, #eee);">
-                                                    <div style="flex:1; min-width:0;">
-                                                        <strong>{{ $assignmentHistory->therapist->name ?? 'Nama terapis tidak tersedia' }}</strong>
-                                                        <small style="display:block; margin-top:4px;">Penugasan #{{ $assignmentHistory->id }}</small>
-                                                        @if($assignmentHistory->created_at)
-                                                            <small style="display:block; margin-top:3px;">{{ $assignmentHistory->created_at->format('d M Y, H:i') }}</small>
-                                                        @endif
-                                                    </div>
-                                                    <span class="status {{ $historyStatusClass }}">{{ $historyStatusLabel }}</span>
-                                                </div>
-                                            @endforeach
+                                        <div class="detail-row" style="align-items:flex-start; gap:12px; padding:10px 0; border-bottom:1px solid var(--border, #eee);">
+                                            <div style="flex:1; min-width:0;">
+                                                <strong>{{ $assignmentHistory->therapist->name ?? 'Nama terapis tidak tersedia' }}</strong>
+                                                <small style="display:block; margin-top:4px;">Penugasan #{{ $assignmentHistory->id }}</small>
+                                                @if($assignmentHistory->created_at)
+                                                <small style="display:block; margin-top:3px;">{{ $assignmentHistory->created_at->format('d M Y, H:i') }}</small>
+                                                @endif
+                                            </div>
+                                            <span class="status {{ $historyStatusClass }}">{{ $historyStatusLabel }}</span>
+                                        </div>
+                                        @endforeach
                                         @else
-                                            <span>Belum ada penugasan terapis.</span>
+                                        <span>Belum ada penugasan terapis.</span>
                                         @endif
                                     </div>
 
@@ -1289,19 +1292,19 @@
                                     <div class="detail-group">
                                         <h3>Action</h3>
                                         @if($booking->status === 'rejected')
-                                            <span class="t-bad t-bold">Pesanan customer ditolak.</span>
+                                        <span class="t-bad t-bold">Pesanan customer ditolak.</span>
                                         @elseif($booking->status === 'completed' || ($latestAssignment && $latestAssignment->status === 'completed'))
-                                            <span class="t-done t-bold">Treatment telah selesai.</span>
+                                        <span class="t-done t-bold">Treatment telah selesai.</span>
                                         @elseif($latestAssignment && $latestAssignment->status === 'accepted' && $latestAssignment->admin_status === 'approved')
-                                            <span class="t-ok t-bold">Terapis disetujui. Treatment menunggu pelaksanaan.</span>
+                                        <span class="t-ok t-bold">Terapis disetujui. Treatment menunggu pelaksanaan.</span>
                                         @elseif($latestAssignment && $latestAssignment->status === 'accepted' && $latestAssignment->admin_status === 'pending')
-                                            <span class="t-wait">Menunggu keputusan admin atas penugasan.</span>
+                                        <span class="t-wait">Menunggu keputusan admin atas penugasan.</span>
                                         @elseif($latestAssignment && $latestAssignment->status === 'accepted' && $latestAssignment->admin_status === 'rejected')
-                                            <span class="t-bad">Penugasan ditolak admin. Silakan tugaskan ulang.</span>
+                                        <span class="t-bad">Penugasan ditolak admin. Silakan tugaskan ulang.</span>
                                         @elseif($latestAssignment && $latestAssignment->status === 'rejected')
-                                            <span class="t-bad">Terapis menolak penugasan. Silakan tugaskan ulang.</span>
+                                        <span class="t-bad">Terapis menolak penugasan. Silakan tugaskan ulang.</span>
                                         @else
-                                            <span class="t-wait">Booking belum memiliki penugasan terapis.</span>
+                                        <span class="t-wait">Booking belum memiliki penugasan terapis.</span>
                                         @endif
                                     </div>
                                 </template>
@@ -1332,24 +1335,24 @@
 
                             <td>
                                 @if($latestAssignment && $latestAssignment->therapist)
-                                    @if($latestAssignment->status === 'rejected')
-                                        <small class="status status-rejected">Terapis menolak tugas</small>
-                                    @else
-                                       
-                                        @if($latestAssignment->status === 'pending')
-                                            <small class="status status-pending">Menunggu respons</small>
-                                        @elseif($latestAssignment->status === 'accepted')
-                                            <small class="status {{ $latestAssignment->admin_status === 'approved' ? 'status-approved' : ($latestAssignment->admin_status === 'rejected' ? 'status-rejected' : 'status-pending') }}">
-                                                {{ $latestAssignment->admin_status === 'approved' ? 'Disetujui Admin' : ($latestAssignment->admin_status === 'rejected' ? 'Ditolak Admin' : 'Menunggu Admin') }}
-                                            </small>
-                                        @elseif($latestAssignment->status === 'completed')
-                                            <small class="status status-completed">Selesai</small>
-                                        @else
-                                            <small>{{ ucfirst($latestAssignment->status) }}</small>
-                                        @endif
-                                    @endif
+                                @if($latestAssignment->status === 'rejected')
+                                <small class="status status-rejected">Terapis menolak tugas</small>
                                 @else
-                                    <span>-</span>
+
+                                @if($latestAssignment->status === 'pending')
+                                <small class="status status-pending">Menunggu respons</small>
+                                @elseif($latestAssignment->status === 'accepted')
+                                <small class="status {{ $latestAssignment->admin_status === 'approved' ? 'status-approved' : ($latestAssignment->admin_status === 'rejected' ? 'status-rejected' : 'status-pending') }}">
+                                    {{ $latestAssignment->admin_status === 'approved' ? 'Disetujui Admin' : ($latestAssignment->admin_status === 'rejected' ? 'Ditolak Admin' : 'Menunggu Admin') }}
+                                </small>
+                                @elseif($latestAssignment->status === 'completed')
+                                <small class="status status-completed">Selesai</small>
+                                @else
+                                <small>{{ ucfirst($latestAssignment->status) }}</small>
+                                @endif
+                                @endif
+                                @else
+                                <span>-</span>
                                 @endif
                             </td>
 

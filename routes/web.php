@@ -81,7 +81,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Notifikasi Admin
     Route::get('/admin/notifications', [BookingController::class, 'notifications'])
         ->name('admin.notifications');
+
+    // Profil Admin
+    Route::get('/admin/profile', [CustomerController::class, 'adminProfile'])
+        ->name('admin.profile');
+
+    Route::post('/admin/profile/photo', [CustomerController::class, 'uploadAdminPhoto'])
+        ->name('admin.profile.photo');
 });
+
+
+
 
 
 /*
@@ -147,6 +157,14 @@ Route::middleware(['auth', 'role:therapist'])->group(function () {
     // Menyelesaikan treatment
     Route::post('/therapist/assignment/{id}/complete', [TherapistController::class, 'complete'])
         ->name('therapist.assignment.complete');
+
+
+    // Profil Worker
+    Route::get('/therapist/profile', [CustomerController::class, 'therapistProfile'])
+        ->name('therapist.profile');
+
+    Route::post('/therapist/profile/photo', [CustomerController::class, 'uploadTherapistPhoto'])
+        ->name('therapist.profile.photo');
 });
 
 

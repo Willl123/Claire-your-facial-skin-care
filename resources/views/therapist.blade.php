@@ -751,6 +751,9 @@
             <div>
                 <h1>Dashboard Terapis</h1>
                 <p>Selamat datang, {{ Auth::user()->name }}</p>
+                <a href="{{ route('therapist.profile') }}">
+                    Profil Saya
+                </a>
             </div>
 
             <div class="availability-box">
