@@ -95,12 +95,14 @@ class CustomerController extends Controller
     }
 
     // PROSES SIMPAN FOTO
+    // PROSES SIMPAN FOTO
     private function savePhoto(Request $request)
     {
         $request->validate([
             'photo' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
+        /** @var User $user */
         $user = Auth::user();
 
         if ($request->hasFile('photo')) {
