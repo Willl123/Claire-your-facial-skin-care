@@ -10,7 +10,6 @@
 
     <style>
         :root {
-            --page: #e6f0e8;
             --white: #ffffff;
             --soft: #f6f8f6;
             --line: #edf0ed;
@@ -101,7 +100,6 @@
             place-items: center;
             font-weight: 700;
             font-size: 20px;
-            letter-spacing: 0;
         }
 
         .side-nav {
@@ -261,34 +259,6 @@
             margin-bottom: 26px;
         }
 
-        /* ================= PEKERJAAN MASUK (UPCOMING) ================= */
-
-        .table-head,
-        .incoming-main {
-            display: grid;
-            grid-template-columns: 2.1fr 1.5fr 1.25fr 0.8fr;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .table-head {
-            padding-bottom: 12px;
-            font-size: 13px;
-            color: var(--muted);
-        }
-
-        .incoming-row {
-            padding: 16px 0;
-            border-top: 1px solid var(--line);
-        }
-
-        .person {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 0;
-        }
-
         .avatar {
             width: 46px;
             height: 46px;
@@ -299,6 +269,18 @@
             font-weight: 700;
             font-size: 17px;
             flex-shrink: 0;
+        }
+
+        .avatar-img {
+            object-fit: cover;
+            display: block;
+        }
+
+        .person {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
         }
 
         .person b {
@@ -316,15 +298,92 @@
             overflow-wrap: anywhere;
         }
 
-        .cell {
-            color: #6f7a73;
-            font-size: 13.5px;
+        /* ================= PEKERJAAN MASUK (GESER KE SAMPING) ================= */
+
+        .incoming-section {
+            min-width: 0;
+        }
+
+        .title-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .slider-btn {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--brand);
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .slider-btn:hover {
+            background: var(--brand);
+            color: #fff;
+        }
+
+        .incoming-track {
+            display: flex;
+            align-items: stretch;
+            gap: 14px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding-bottom: 12px;
+            scrollbar-width: thin;
+        }
+
+        .incoming-track .incoming-card {
+            flex: 0 0 300px;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--soft);
+        }
+
+        .job-info {
+            display: grid;
+            gap: 9px;
+            margin: 16px 0;
+            padding: 14px 0;
+            border-top: 1px dashed var(--line);
+            border-bottom: 1px dashed var(--line);
+        }
+
+        .job-info div {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .job-info span {
+            color: var(--muted);
+        }
+
+        .job-info b {
+            font-weight: 600;
+            text-align: right;
             overflow-wrap: anywhere;
         }
 
-        .incoming-extra {
-            margin-top: 12px;
-            padding-left: 58px;
+        .incoming-bottom {
+            margin-top: auto;
         }
 
         .assignment-status {
@@ -385,16 +444,15 @@
             padding: 11px 12px;
             border: 1px solid var(--line);
             border-radius: 10px;
-            background: var(--soft);
+            background: #fff;
             font-size: 12.5px;
             color: var(--ink);
-            resize: vertical;
+            resize: none;
         }
 
         .reject-reason:focus {
             outline: none;
             border-color: var(--brand);
-            background: #fff;
         }
 
         .rejection-info {
@@ -416,7 +474,11 @@
             font-size: 13px;
         }
 
-        /* ================= KARTU HIJAU (NEXT APPOINTMENT) ================= */
+        /* ================= KARTU HIJAU (PEKERJAAN TERDEKAT) ================= */
+
+        .feature-wrap {
+            min-width: 0;
+        }
 
         .feature {
             position: relative;
@@ -441,6 +503,10 @@
         .feature>* {
             position: relative;
             z-index: 1;
+        }
+
+        .feature-static {
+            min-height: 300px;
         }
 
         .feature-top {
@@ -483,6 +549,16 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 14px;
+        }
+
+        .feature-badge {
+            margin-left: auto;
+            padding: 5px 11px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.2);
+            font-size: 11.5px;
+            font-weight: 600;
+            white-space: nowrap;
         }
 
         .feature-actions {
@@ -532,7 +608,68 @@
             line-height: 1.6;
         }
 
-        /* ================= KALENDER (THERAPIST SCHEDULE) ================= */
+        /* TUMPUKAN KARTU */
+
+        .stack {
+            position: relative;
+            height: 382px;
+        }
+
+        .stack-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 340px;
+            display: flex;
+            flex-direction: column;
+            transform-origin: bottom center;
+            transition: transform 0.35s ease, opacity 0.35s ease, filter 0.35s ease;
+        }
+
+        .stack-card .feature-actions {
+            margin-top: auto;
+        }
+
+        .stack-card[data-pos="0"] {
+            z-index: 3;
+            transform: none;
+        }
+
+        .stack-card[data-pos="1"] {
+            z-index: 2;
+            transform: translateY(15px) scale(0.95);
+            filter: brightness(0.93);
+            pointer-events: none;
+        }
+
+        .stack-card[data-pos="2"] {
+            z-index: 1;
+            transform: translateY(30px) scale(0.9);
+            filter: brightness(0.86);
+            pointer-events: none;
+        }
+
+        .stack-card[data-pos="3"],
+        .stack-card[data-pos="4"] {
+            z-index: 0;
+            transform: translateY(30px) scale(0.9);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .stack-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* ================= KALENDER ================= */
 
         .calendar-top {
             display: flex;
@@ -633,8 +770,6 @@
             color: #c4cbc6;
             font-size: 12px;
         }
-
-        /* BLOK EVENT BERWARNA */
 
         .booking-event {
             padding: 9px 10px;
@@ -741,8 +876,6 @@
             font-weight: 700;
         }
 
-        /* LEGEND */
-
         .calendar-legend {
             display: flex;
             flex-wrap: wrap;
@@ -786,6 +919,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
         }
 
         .bell {
@@ -816,6 +950,7 @@
             text-decoration: none;
             font-weight: 600;
             font-size: 13.5px;
+            min-width: 0;
         }
 
         .profile-link .avatar {
@@ -823,6 +958,13 @@
             height: 36px;
             font-size: 14px;
             background: var(--brand);
+        }
+
+        .profile-link span {
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .right-title {
@@ -850,17 +992,6 @@
             border-radius: 14px;
             background: #fff;
         }
-
-        .panel-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        /* KETERSEDIAAN */
 
         .availability-row {
             display: flex;
@@ -898,8 +1029,6 @@
         .availability-button:hover {
             opacity: 0.88;
         }
-
-        /* STATISTIK */
 
         .stat-row+.stat-row {
             margin-top: 16px;
@@ -948,8 +1077,6 @@
         .bar-done span {
             background: var(--violet);
         }
-
-        /* JADWAL PENTING (HARI INI) */
 
         .today-item {
             padding: 18px 0;
@@ -1030,8 +1157,6 @@
         .btn-wide:hover {
             opacity: 0.9;
         }
-
-        /* NOTIFIKASI */
 
         .notif {
             display: flex;
@@ -1131,22 +1256,6 @@
                 padding: 20px 16px;
             }
 
-            .table-head {
-                display: none;
-            }
-
-            .incoming-main {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .incoming-main .person {
-                grid-column: 1 / -1;
-            }
-
-            .incoming-extra {
-                padding-left: 0;
-            }
-
             .search-box {
                 flex-basis: 100%;
             }
@@ -1161,6 +1270,18 @@
 
             .header h1 {
                 font-size: 25px;
+            }
+
+            .stack {
+                height: 420px;
+            }
+
+            .stack-card {
+                height: 380px;
+            }
+
+            .incoming-track .incoming-card {
+                flex-basis: 85%;
             }
         }
     </style>
@@ -1270,7 +1391,8 @@
             . ' ' . substr($item->booking->booking_time, 0, 5);
             };
 
-            $nextAssignment = $calendarAssignments->flatten(1)
+            // Maksimal 5 pekerjaan terdekat yang sudah disetujui admin
+            $upcomingAssignments = $calendarAssignments->flatten(1)
             ->filter(function ($item) use ($startAt) {
             return $item->status === 'accepted'
             && $item->admin_status === 'approved'
@@ -1279,11 +1401,12 @@
             ->sortBy(function ($item) use ($startAt) {
             return $startAt($item);
             })
-            ->first();
+            ->values()
+            ->take(5);
             @endphp
 
 
-            <!-- ================= PEKERJAAN MASUK + KARTU HIJAU ================= -->
+            <!-- ================= PEKERJAAN MASUK + PEKERJAAN TERDEKAT ================= -->
             <div class="top-row">
 
                 <!-- INCOMING ASSIGNMENTS -->
@@ -1293,10 +1416,21 @@
 
                         <h2>Pekerjaan Masuk</h2>
 
-                        <span class="count-pill">
-                            {{ $incomingAssignments->where('status', 'pending')->count() }}
-                            Menunggu Respons
-                        </span>
+                        <div class="title-right">
+
+                            <span class="count-pill">
+                                {{ $incomingAssignments->where('status', 'pending')->count() }}
+                                Menunggu Respons
+                            </span>
+
+                            @if($incomingAssignments->count() > 1)
+                            <div class="slider-btns">
+                                <button type="button" class="slider-btn" id="incomingPrev" aria-label="Sebelumnya">&lsaquo;</button>
+                                <button type="button" class="slider-btn" id="incomingNext" aria-label="Berikutnya">&rsaquo;</button>
+                            </div>
+                            @endif
+
+                        </div>
 
                     </div>
 
@@ -1309,23 +1443,16 @@
 
                     @else
 
-                    <div class="table-head">
-                        <span>Pelanggan</span>
-                        <span>Treatment</span>
-                        <span>Tanggal</span>
-                        <span>Jam</span>
-                    </div>
+                    <div class="incoming-track" id="incomingTrack">
 
-                    @foreach($incomingAssignments as $assignment)
+                        @foreach($incomingAssignments as $assignment)
 
-                    @php
-                    $booking = $assignment->booking;
-                    $avatarColor = $palette[$booking->id % 4];
-                    @endphp
+                        @php
+                        $booking = $assignment->booking;
+                        $avatarColor = $palette[$booking->id % 4];
+                        @endphp
 
-                    <div class="incoming-row incoming-card">
-
-                        <div class="incoming-main">
+                        <div class="incoming-card">
 
                             <div class="person">
                                 <div class="avatar" style="background: {{ $avatarColor }};">
@@ -1341,181 +1468,215 @@
                                 </div>
                             </div>
 
-                            <div class="cell">{{ $booking->treatment }}</div>
+                            <div class="job-info">
+                                <div>
+                                    <span>Treatment</span>
+                                    <b>{{ $booking->treatment }}</b>
+                                </div>
 
-                            <div class="cell">
-                                {{ \Carbon\Carbon::parse($booking->booking_date)->translatedFormat('d F Y') }}
+                                <div>
+                                    <span>Tanggal</span>
+                                    <b>{{ \Carbon\Carbon::parse($booking->booking_date)->translatedFormat('d F Y') }}</b>
+                                </div>
+
+                                <div>
+                                    <span>Jam</span>
+                                    <b>{{ substr($booking->booking_time, 0, 5) }} WIB</b>
+                                </div>
                             </div>
 
-                            <div class="cell">
-                                {{ substr($booking->booking_time, 0, 5) }} WIB
-                            </div>
+                            <div class="incoming-bottom">
 
-                        </div>
+                                @if($assignment->status === 'pending')
 
+                                <span class="assignment-status pending">
+                                    Menunggu Respons
+                                </span>
 
-                        <div class="incoming-extra">
+                                @elseif($assignment->status === 'rejected')
 
-                            @if($assignment->status === 'pending')
+                                <span class="assignment-status rejected">
+                                    Pekerjaan Ditolak
+                                </span>
 
-                            <span class="assignment-status pending">
-                                Menunggu Respons
-                            </span>
-
-                            @elseif($assignment->status === 'rejected')
-
-                            <span class="assignment-status rejected">
-                                Pekerjaan Ditolak
-                            </span>
-
-                            @endif
+                                @endif
 
 
-                            @if($assignment->status === 'pending')
+                                @if($assignment->status === 'pending')
 
-                            <!-- ACCEPT -->
-                            <div class="assignment-actions">
-
-                                <form
-                                    action="{{ route('therapist.assignment.accept', $assignment->id) }}"
-                                    method="POST"
-                                    style="flex: 1;"
-                                    onsubmit="return confirm('Apakah kamu yakin menerima pekerjaan ini?')">
-
-                                    @csrf
-
-                                    <button type="submit" class="btn-accept" style="width:100%;">
-                                        Terima Pekerjaan
-                                    </button>
-
-                                </form>
-
-                            </div>
-
-
-                            <!-- REJECT -->
-                            <form
-                                action="{{ route('therapist.assignment.reject', $assignment->id) }}"
-                                method="POST">
-
-                                @csrf
-
-                                <textarea
-                                    name="rejection_reason"
-                                    class="reject-reason"
-                                    rows="2"
-                                    placeholder="Tuliskan alasan penolakan..."
-                                    required></textarea>
-
+                                <!-- ACCEPT -->
                                 <div class="assignment-actions">
 
-                                    <button
-                                        type="submit"
-                                        class="btn-reject"
-                                        onclick="return confirm('Apakah kamu yakin menolak pekerjaan ini?')">
+                                    <form
+                                        action="{{ route('therapist.assignment.accept', $assignment->id) }}"
+                                        method="POST"
+                                        style="flex: 1;"
+                                        onsubmit="return confirm('Apakah kamu yakin menerima pekerjaan ini?')">
 
-                                        Tolak Pekerjaan
+                                        @csrf
 
-                                    </button>
+                                        <button type="submit" class="btn-accept" style="width:100%;">
+                                            Terima Pekerjaan
+                                        </button>
+
+                                    </form>
 
                                 </div>
 
-                            </form>
 
-                            @elseif($assignment->status === 'rejected')
+                                <!-- REJECT -->
+                                <form
+                                    action="{{ route('therapist.assignment.reject', $assignment->id) }}"
+                                    method="POST">
 
-                            <div class="rejection-info">
+                                    @csrf
 
-                                <strong>Alasan Penolakan:</strong>
-                                <br>
+                                    <textarea
+                                        name="rejection_reason"
+                                        class="reject-reason"
+                                        rows="2"
+                                        placeholder="Tuliskan alasan penolakan..."
+                                        required></textarea>
 
-                                {{ $assignment->rejection_reason ?? 'Tidak ada alasan.' }}
+                                    <div class="assignment-actions">
+
+                                        <button
+                                            type="submit"
+                                            class="btn-reject"
+                                            onclick="return confirm('Apakah kamu yakin menolak pekerjaan ini?')">
+
+                                            Tolak Pekerjaan
+
+                                        </button>
+
+                                    </div>
+
+                                </form>
+
+                                @elseif($assignment->status === 'rejected')
+
+                                <div class="rejection-info">
+
+                                    <strong>Alasan Penolakan:</strong>
+                                    <br>
+
+                                    {{ $assignment->rejection_reason ?? 'Tidak ada alasan.' }}
+
+                                </div>
+
+                                @endif
 
                             </div>
 
-                            @endif
-
                         </div>
 
-                    </div>
+                        @endforeach
 
-                    @endforeach
+                    </div>
 
                     @endif
 
                 </section>
 
 
-                <!-- KARTU HIJAU: JADWAL BERIKUTNYA -->
-                <section class="feature">
+                <!-- KARTU HIJAU: PEKERJAAN TERDEKAT (BERTUMPUK) -->
+                <section class="feature-wrap">
 
-                    @if($nextAssignment)
+                    @if($upcomingAssignments->isNotEmpty())
 
-                    @php
-                    $nextBooking = $nextAssignment->booking;
-                    @endphp
+                    <div class="stack" id="stack">
 
-                    <div class="feature-top">
-                        <div class="avatar">
-                            {{ strtoupper(substr($nextBooking->user->name ?? 'C', 0, 1)) }}
+                        @foreach($upcomingAssignments as $item)
+
+                        @php
+                        $nextBooking = $item->booking;
+                        @endphp
+
+                        <div class="feature stack-card" data-pos="{{ $loop->index }}">
+
+                            <div class="feature-top">
+                                <div class="avatar">
+                                    {{ strtoupper(substr($nextBooking->user->name ?? 'C', 0, 1)) }}
+                                </div>
+
+                                <div>
+                                    <b>{{ $nextBooking->user->name ?? 'Customer' }}</b>
+                                    <small>{{ $nextBooking->place === 'home' ? 'Home Service' : 'Klinik' }} · {{ $nextBooking->phone ?? '-' }}</small>
+                                </div>
+
+                                <span class="feature-badge">
+                                    {{ $loop->first ? 'Terdekat' : 'Berikutnya' }}
+                                </span>
+                            </div>
+
+                            <span class="label">Treatment</span>
+                            <span class="value">{{ $nextBooking->treatment }}</span>
+
+                            <div class="feature-meta">
+                                <div>
+                                    <span class="label">Tanggal</span>
+                                    <span class="value">
+                                        {{ \Carbon\Carbon::parse($nextBooking->booking_date)->translatedFormat('d F Y') }}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    <span class="label">Jam</span>
+                                    <span class="value">{{ substr($nextBooking->booking_time, 0, 5) }} WIB</span>
+                                </div>
+                            </div>
+
+                            <div class="feature-actions">
+                                <a href="#bookings" class="btn-lime">Lihat Jadwal</a>
+
+                                @if($nextBooking->phone)
+                                <a href="tel:{{ $nextBooking->phone }}" class="btn-round" title="Hubungi pelanggan">
+                                    <svg class="ic" viewBox="0 0 24 24">
+                                        <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" />
+                                    </svg>
+                                </a>
+                                @endif
+                            </div>
+
                         </div>
 
-                        <div>
-                            <b>{{ $nextBooking->user->name ?? 'Customer' }}</b>
-                            <small>{{ $nextBooking->place === 'home' ? 'Home Service' : 'Klinik' }} · {{ $nextBooking->phone ?? '-' }}</small>
-                        </div>
+                        @endforeach
+
                     </div>
 
-                    <span class="label">Treatment</span>
-                    <span class="value">{{ $nextBooking->treatment }}</span>
-
-                    <div class="feature-meta">
-                        <div>
-                            <span class="label">Jadwal Berikutnya</span>
-                            <span class="value">
-                                {{ \Carbon\Carbon::parse($nextBooking->booking_date)->translatedFormat('d F Y') }}
-                            </span>
-                        </div>
-
-                        <div>
-                            <span class="label">Jam</span>
-                            <span class="value">{{ substr($nextBooking->booking_time, 0, 5) }} WIB</span>
-                        </div>
+                    @if($upcomingAssignments->count() > 1)
+                    <div class="stack-nav">
+                        <button type="button" class="slider-btn" id="stackPrev" aria-label="Sebelumnya">&lsaquo;</button>
+                        <span id="stackCounter">1 / {{ $upcomingAssignments->count() }}</span>
+                        <button type="button" class="slider-btn" id="stackNext" aria-label="Berikutnya">&rsaquo;</button>
                     </div>
-
-                    <div class="feature-actions">
-                        <a href="#bookings" class="btn-lime">Lihat Jadwal</a>
-
-                        @if($nextBooking->phone)
-                        <a href="tel:{{ $nextBooking->phone }}" class="btn-round" title="Hubungi pelanggan">
-                            <svg class="ic" viewBox="0 0 24 24">
-                                <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" />
-                            </svg>
-                        </a>
-                        @endif
-                    </div>
+                    @endif
 
                     @else
 
-                    <div class="feature-top">
-                        <div class="avatar">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    <div class="feature feature-static">
+
+                        <div class="feature-top">
+                            <div class="avatar">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            </div>
+
+                            <div>
+                                <b>{{ Auth::user()->name }}</b>
+                                <small>Terapis CLAIRE</small>
+                            </div>
                         </div>
 
-                        <div>
-                            <b>{{ Auth::user()->name }}</b>
-                            <small>Terapis CLAIRE</small>
+                        <span class="label">Pekerjaan Terdekat</span>
+
+                        <p class="feature-empty">
+                            Belum ada jadwal mendatang yang disetujui admin.
+                        </p>
+
+                        <div class="feature-actions">
+                            <a href="#bookings" class="btn-lime">Lihat Jadwal</a>
                         </div>
-                    </div>
 
-                    <span class="label">Jadwal Berikutnya</span>
-
-                    <p class="feature-empty">
-                        Belum ada jadwal mendatang yang disetujui admin.
-                    </p>
-
-                    <div class="feature-actions">
-                        <a href="#bookings" class="btn-lime">Lihat Jadwal</a>
                     </div>
 
                     @endif
@@ -1783,6 +1944,11 @@
         <aside class="right">
 
             <!-- NOTIFIKASI + PROFIL -->
+            @php
+            $user = Auth::user();
+            $photoUrl = $user->photo ? asset('storage/' . $user->photo) : null;
+            @endphp
+
             <div class="right-top">
 
                 <a href="#incoming" class="bell {{ $incomingAssignments->where('status', 'pending')->count() > 0 ? 'has-new' : '' }}" title="Pekerjaan masuk">
@@ -1792,8 +1958,14 @@
                 </a>
 
                 <a href="{{ route('therapist.profile') }}" class="profile-link" title="Profil Saya">
-                    <div class="avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
-                    <span>Profil Saya</span>
+
+                    @if($photoUrl)
+                    <img src="{{ $photoUrl }}" alt="{{ $user->name }}" class="avatar avatar-img">
+                    @else
+                    <div class="avatar">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                    @endif
+
+                    <span>{{ $user->name }}</span>
                 </a>
 
             </div>
@@ -1989,6 +2161,66 @@
                 item.style.display = cocok ? '' : 'none';
             });
         });
+
+
+        // ================= PEKERJAAN MASUK: GESER KE SAMPING =================
+
+        const incomingTrack = document.getElementById('incomingTrack');
+
+        if (incomingTrack) {
+            const geser = function(arah) {
+                const kartu = incomingTrack.querySelector('.incoming-card');
+                const lebar = kartu ? kartu.offsetWidth + 14 : 300;
+
+                incomingTrack.scrollBy({
+                    left: arah * lebar,
+                    behavior: 'smooth'
+                });
+            };
+
+            const btnPrev = document.getElementById('incomingPrev');
+            const btnNext = document.getElementById('incomingNext');
+
+            if (btnPrev) btnPrev.addEventListener('click', function() {
+                geser(-1);
+            });
+
+            if (btnNext) btnNext.addEventListener('click', function() {
+                geser(1);
+            });
+        }
+
+
+        // ================= PEKERJAAN TERDEKAT: KARTU BERTUMPUK =================
+
+        const stackCards = Array.from(document.querySelectorAll('.stack-card'));
+        const stackCounter = document.getElementById('stackCounter');
+
+        let activeCard = 0;
+
+        function renderStack() {
+            const total = stackCards.length;
+
+            stackCards.forEach(function(card, i) {
+                card.dataset.pos = (i - activeCard + total) % total;
+            });
+
+            if (stackCounter) {
+                stackCounter.textContent = (activeCard + 1) + ' / ' + total;
+            }
+        }
+
+        if (stackCards.length > 1) {
+            document.getElementById('stackNext').addEventListener('click', function() {
+                activeCard = (activeCard + 1) % stackCards.length;
+                renderStack();
+            });
+
+            document.getElementById('stackPrev').addEventListener('click', function() {
+                activeCard = (activeCard - 1 + stackCards.length) % stackCards.length;
+                renderStack();
+            });
+        }
     </script>
 
 </body>
