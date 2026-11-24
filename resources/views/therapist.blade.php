@@ -259,7 +259,11 @@
             margin-bottom: 26px;
         }
 
+        /* AVATAR: huruf inisial di bawah, foto menutupi di atasnya */
+
         .avatar {
+            position: relative;
+            overflow: hidden;
             width: 46px;
             height: 46px;
             border-radius: 50%;
@@ -271,7 +275,11 @@
             flex-shrink: 0;
         }
 
-        .avatar-img {
+        .avatar img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             display: block;
         }
@@ -1290,6 +1298,55 @@
 
 <body>
 
+    {{-- ================= FUNGSI AVATAR (FOTO + CADANGAN HURUF) ================= --}}
+    @php
+    // Mencari alamat foto dari kolom "photo" di tabel users
+    $photoOf = function ($u) {
+    $path = $u->photo ?? null;
+
+    if (!$path) {
+    return null;
+    }
+
+    // Sudah berupa URL penuh
+    if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://'])) {
+    return $path;
+    }
+
+    $path = ltrim($path, '/');
+
+    // Sudah diawali "storage/"
+    if (\Illuminate\Support\Str::startsWith($path, 'storage/')) {
+    return asset($path);
+    }
+
+    // File ada langsung di folder public/
+    if (file_exists(public_path($path))) {
+    return asset($path);
+    }
+
+    // Default Laravel: storage/app/public (lewat php artisan storage:link)
+    return asset('storage/' . $path);
+    };
+
+    // Membuat avatar: huruf inisial di bawah, foto menutupinya.
+    // Kalau foto gagal dimuat, foto dihapus dan huruf inisial tetap tampil.
+    $avatar = function ($u, $color = null) use ($photoOf) {
+    $name = $u->name ?? 'Customer';
+    $initial = e(strtoupper(mb_substr($name, 0, 1)));
+    $style = $color ? ' style="background:' . e($color) . ';"' : '';
+    $url = $photoOf($u);
+
+    $img = $url
+    ? '<img src="' . e($url) . '" alt="' . e($name) . '" onerror="this.remove()">'
+    : '';
+
+    return new \Illuminate\Support\HtmlString(
+    '<div class="avatar"' . $style . '>' . $initial . $img . '</div>'
+    );
+    };
+    @endphp
+
     <div class="shell">
 
         <!-- ================= SIDEBAR ================= -->
@@ -1455,9 +1512,7 @@
                         <div class="incoming-card">
 
                             <div class="person">
-                                <div class="avatar" style="background: {{ $avatarColor }};">
-                                    {{ strtoupper(substr($booking->user->name ?? 'C', 0, 1)) }}
-                                </div>
+                                {!! $avatar($booking->user, $avatarColor) !!}
 
                                 <div>
                                     <b>{{ $booking->user->name ?? 'Customer' }}</b>
@@ -1595,9 +1650,7 @@
                         <div class="feature stack-card" data-pos="{{ $loop->index }}">
 
                             <div class="feature-top">
-                                <div class="avatar">
-                                    {{ strtoupper(substr($nextBooking->user->name ?? 'C', 0, 1)) }}
-                                </div>
+                                {!! $avatar($nextBooking->user) !!}
 
                                 <div>
                                     <b>{{ $nextBooking->user->name ?? 'Customer' }}</b>
@@ -1657,9 +1710,7 @@
                     <div class="feature feature-static">
 
                         <div class="feature-top">
-                            <div class="avatar">
-                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                            </div>
+                            {!! $avatar(Auth::user()) !!}
 
                             <div>
                                 <b>{{ Auth::user()->name }}</b>
@@ -1944,11 +1995,6 @@
         <aside class="right">
 
             <!-- NOTIFIKASI + PROFIL -->
-            @php
-            $user = Auth::user();
-            $photoUrl = $user->photo ? asset('storage/' . $user->photo) : null;
-            @endphp
-
             <div class="right-top">
 
                 <a href="#incoming" class="bell {{ $incomingAssignments->where('status', 'pending')->count() > 0 ? 'has-new' : '' }}" title="Pekerjaan masuk">
@@ -1958,14 +2004,8 @@
                 </a>
 
                 <a href="{{ route('therapist.profile') }}" class="profile-link" title="Profil Saya">
-
-                    @if($photoUrl)
-                    <img src="{{ $photoUrl }}" alt="{{ $user->name }}" class="avatar avatar-img">
-                    @else
-                    <div class="avatar">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
-                    @endif
-
-                    <span>{{ $user->name }}</span>
+                    {!! $avatar(Auth::user()) !!}
+                    <span>{{ Auth::user()->name }}</span>
                 </a>
 
             </div>
@@ -2057,9 +2097,7 @@
                     <div class="today-item">
 
                         <div class="today-person">
-                            <div class="avatar" style="background: {{ $palette[$booking->id % 4] }};">
-                                {{ strtoupper(substr($booking->user->name ?? 'C', 0, 1)) }}
-                            </div>
+                            {!! $avatar($booking->user, $palette[$booking->id % 4]) !!}
 
                             <div>
                                 <b>{{ $booking->user->name ?? 'Customer' }}</b>
