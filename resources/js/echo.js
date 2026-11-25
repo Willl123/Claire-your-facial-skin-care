@@ -106,4 +106,7 @@ window.Echo.private('admin.bookings')
     } catch (error) {
         console.error('Gagal memperbarui tabel booking:', error);
     }
+
+
+    console.log('Echo siap digunakan untuk chat dan admin.');
 });

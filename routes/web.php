@@ -10,7 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\TherapistController;
-
+use App\Http\Controllers\ChatController;
 /*
 |--------------------------------------------------------------------------
 | Halaman Utama
@@ -170,6 +170,23 @@ Route::middleware(['auth', 'role:therapist'])->group(function () {
     Route::post('/therapist/profile/photo', [CustomerController::class, 'uploadTherapistPhoto'])
         ->name('therapist.profile.photo');
 });
+
+
+
+
+// CHAT CUSTOMER DAN WORKER
+Route::get('/chat/booking/{bookingId}', [ChatController::class, 'open'])
+    ->name('chat.open');
+
+Route::get('/chat/{chat}/messages', [ChatController::class, 'messages'])
+    ->name('chat.messages');
+
+Route::post('/chat/{chat}/messages', [ChatController::class, 'send'])
+    ->name('chat.send');
+
+
+
+
 
 
 /*

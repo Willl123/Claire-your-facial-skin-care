@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -228,6 +228,38 @@
             line-height: 1.8;
         }
 
+
+        /* CHAT BUTTON */
+
+        .chat-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 9px 15px;
+            border: 1px solid #24442f;
+            border-radius: 9px;
+            background: #24442f;
+            color: #fff;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .25s;
+        }
+
+        .chat-btn:hover {
+            background: #355c40;
+            border-color: #355c40;
+            transform: translateY(-2px);
+        }
+
+        .chat-btn svg {
+            width: 15px;
+            height: 15px;
+        }
+
+
         /* RESPONSIVE */
 
         @media (max-width: 768px) {
@@ -293,22 +325,22 @@
 
 <body>
 
-<div class="container">
+    <div class="container">
 
-    <!-- HEADER -->
-    <div class="header">
-        <div>
-            <h1>Notifications</h1>
-            <p>Monitor all updates related to your treatment bookings.</p>
+        <!-- HEADER -->
+        <div class="header">
+            <div>
+                <h1>Notifications</h1>
+                <p>Monitor all updates related to your treatment bookings.</p>
+            </div>
+
+            <a href="/dashboard" class="back-btn">
+                &larr; Back to Dashboard
+            </a>
         </div>
 
-        <a href="/dashboard" class="back-btn">
-            &larr; Back to Dashboard
-        </a>
-    </div>
-
-    <!-- NOTIFICATION LIST -->
-    @forelse($bookings as $b)
+        <!-- NOTIFICATION LIST -->
+        @forelse($bookings as $b)
 
         <div class="notification">
 
@@ -336,11 +368,33 @@
 
                 </div>
 
-                <div class="actions">
+
+                <div class="actions" style="justify-content: space-between;">
+
+                    <div>
+                        @if($b->status === 'approved' && $b->therapist_id)
+                        <a href="{{ route('chat.open', $b->id) }}"
+                            class="chat-btn">
+
+                            <svg viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round">
+
+                                <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.9L3 21l1.9-5.5a8.4 8.4 0 0 1-.9-4A8.5 8.5 0 0 1 12.5 3H13a8.5 8.5 0 0 1 8 8.5Z" />
+
+                            </svg>
+
+                            Chat Worker
+                        </a>
+                        @endif
+                    </div>
 
                     <form method="POST"
-                          action="{{ route('notifications.hide', $b->id) }}"
-                          onsubmit="return confirm('Apakah kamu yakin ingin menghapus notifikasi ini?')">
+                        action="{{ route('notifications.hide', $b->id) }}"
+                        onsubmit="return confirm('Apakah kamu yakin ingin menghapus notifikasi ini?')">
 
                         @csrf
 
@@ -356,7 +410,7 @@
 
         </div>
 
-    @empty
+        @empty
 
         <div class="empty">
 
@@ -373,9 +427,10 @@
 
         </div>
 
-    @endforelse
+        @endforelse
 
-</div>
+    </div>
 
 </body>
+
 </html>
