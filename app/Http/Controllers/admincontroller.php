@@ -7,6 +7,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\BookingAssignment;
+
 class AdminController extends Controller
 {
 
@@ -106,5 +107,29 @@ class AdminController extends Controller
             'previousMonth',
             'nextMonth'
         ));
+    }
+
+
+    public function bookingRow(Booking $booking)
+    {
+        $booking->load([
+            'user',
+            'therapist',
+            'assignments.therapist'
+        ]);
+
+        $therapists = User::where('role', 'therapist')->get();
+
+        $html = view('partials-booking-row', [
+            'booking' => $booking,
+            'therapists' => $therapists
+        ])->render();
+
+        return response()->json([
+            'html' => $html,
+            'totalBookings' => Booking::count(),
+            'pendingBookings' => Booking::where('status', 'pending')->count(),
+            'completedBookings' => Booking::where('status', 'completed')->count(),
+        ]);
     }
 }

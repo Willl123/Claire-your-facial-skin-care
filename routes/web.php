@@ -88,6 +88,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::post('/admin/profile/photo', [CustomerController::class, 'uploadAdminPhoto'])
         ->name('admin.profile.photo');
+
+
+    Route::get('/admin/bookings/{booking}/row', [AdminController::class, 'bookingRow'])
+        ->name('admin.bookings.row');
 });
 
 
