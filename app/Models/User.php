@@ -31,7 +31,7 @@ class User extends Authenticatable
         return $this->hasMany(Booking::class, 'user_id');
     }
 
-    // Booking yang ditugaskan kepada terapis
+    // Booking yang di tugaskan kepada terapis
     public function assignedBookings()
     {
         return $this->hasMany(Booking::class, 'therapist_id');

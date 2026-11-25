@@ -11,11 +11,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 
+use App\Events\BookingCreated;
+use Illuminate\Support\Facades\Log;
+
 class BookingController extends Controller
 {
     // =========================================
     // CUSTOMER MEMBUAT BOOKING
     // =========================================
+
 
     public function store(Request $request)
     {
@@ -55,7 +59,8 @@ class BookingController extends Controller
         $price = $treatmentPrices[$request->treatment];
         $serviceFee = 10000;
 
-        Booking::create([
+        // Simpan booking satu kali
+        $booking = Booking::create([
             'user_id' => Auth::id(),
             'gender' => $request->gender,
             'treatment' => $request->treatment,
@@ -74,9 +79,41 @@ class BookingController extends Controller
             'status' => 'pending',
         ]);
 
+        // Ambil data customer
+        $booking->load('user');
+
+        // Catat proses pengiriman event
+        Log::info('Mencoba mengirim event booking baru', [
+            'booking_id' => $booking->id,
+        ]);
+
+        // Kirim event ke dashboard admin
+        BookingCreated::dispatch([
+            'id' => $booking->id,
+            'customer' => $booking->user->name,
+            'phone' => $booking->phone,
+            'gender' => $booking->gender,
+            'treatment' => $booking->treatment,
+            'booking_date' => $booking->booking_date,
+            'booking_time' => $booking->booking_time,
+            'place' => $booking->place,
+            'address' => $booking->address,
+            'payment_method' => $booking->payment_method,
+            'price' => $booking->price,
+            'service_fee' => $booking->service_fee,
+            'total_price' => $booking->total_price,
+            'notes' => $booking->notes,
+            'status' => $booking->status,
+        ]);
+
+        Log::info('Event booking baru berhasil dikirim', [
+            'booking_id' => $booking->id,
+        ]);
+
         return redirect('/dashboard')
             ->with('success', 'Booking berhasil dibuat.');
     }
+
 
 
     // =========================================

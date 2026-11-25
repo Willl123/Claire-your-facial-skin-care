@@ -1903,6 +1903,7 @@
                 width: 34px;
                 height: 34px;
                 min-width: 34px;
+                
             }
 
             .side-nav a,
