@@ -224,6 +224,7 @@ $filterStatus = 'rejected';
             </div>
 
             <!-- RIWAYAT PENUGASAN -->
+
             <div class="detail-group">
                 <h3>Riwayat Penugasan Terapis</h3>
 
@@ -271,9 +272,35 @@ $filterStatus = 'rejected';
 
                         @if($assignmentHistory->created_at)
                         <small style="display:block; margin-top:3px;">
+                            Ditugaskan:
                             {{ $assignmentHistory->created_at->format('d M Y, H:i') }}
                         </small>
                         @endif
+
+                        {{-- Waktu respons Worker --}}
+                        @if($assignmentHistory->responded_at)
+                        <small style="display:block; margin-top:4px;">
+                            Direspons:
+                            {{ $assignmentHistory->responded_at->format('d M Y, H:i') }}
+                        </small>
+                        @endif
+
+                        {{-- Alasan penolakan Worker --}}
+                        @if(
+                        $assignmentHistory->status === 'rejected' &&
+                        $assignmentHistory->rejection_reason
+                        )
+                        <div class="mt-2 p-2 rounded-lg bg-red-50 border border-red-200">
+                            <p class="text-xs font-semibold text-red-700">
+                                Alasan penolakan:
+                            </p>
+
+                            <p class="text-xs text-red-600 mt-1">
+                                {{ $assignmentHistory->rejection_reason }}
+                            </p>
+                        </div>
+                        @endif
+
                     </div>
 
                     <span class="status {{ $historyStatusClass }}">
@@ -288,6 +315,7 @@ $filterStatus = 'rejected';
                 <span>Belum ada penugasan terapis.</span>
                 @endif
             </div>
+
 
             <!-- ACTION PENUGASAN -->
             <div class="detail-group">

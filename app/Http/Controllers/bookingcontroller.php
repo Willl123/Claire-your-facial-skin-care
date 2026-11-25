@@ -116,6 +116,7 @@ class BookingController extends Controller
 
 
 
+
     // =========================================
     // ADMIN MENYETUJUI PENUGASAN TERAPIS
     // =========================================
@@ -128,13 +129,17 @@ class BookingController extends Controller
                 ->lockForUpdate()
                 ->firstOrFail();
 
+            // Pastikan booking masih menunggu persetujuan.
             if ($booking->status !== 'pending') {
                 throw ValidationException::withMessages([
                     'booking' => 'Pesanan ini tidak lagi menunggu persetujuan.',
                 ]);
             }
 
+            // Pastikan Worker yang menerima tugas adalah
+            // Worker yang saat ini ditugaskan pada booking.
             $assignment = BookingAssignment::where('booking_id', $booking->id)
+                ->where('therapist_id', $booking->therapist_id)
                 ->where('status', 'accepted')
                 ->where('admin_status', 'pending')
                 ->lockForUpdate()
@@ -147,11 +152,13 @@ class BookingController extends Controller
                 ]);
             }
 
+            // Admin menyetujui penugasan.
             $assignment->update([
                 'admin_status' => 'approved',
                 'admin_responded_at' => now(),
             ]);
 
+            // Booking resmi disetujui.
             $booking->update([
                 'status' => 'approved',
             ]);
@@ -162,6 +169,7 @@ class BookingController extends Controller
             'Penugasan terapis berhasil disetujui. Customer dapat melihat pesanan Disetujui.'
         );
     }
+
 
 
     // =========================================
