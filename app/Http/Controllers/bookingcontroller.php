@@ -14,6 +14,8 @@ use Carbon\Carbon;
 use App\Events\BookingCreated;
 use Illuminate\Support\Facades\Log;
 
+use App\Events\AssignmentCreated;
+
 class BookingController extends Controller
 {
     // =========================================
@@ -320,13 +322,12 @@ class BookingController extends Controller
             'therapist_id' => 'required|exists:users,id',
         ]);
 
-        DB::transaction(function () use ($request, $id) {
+        $assignment = DB::transaction(function () use ($request, $id) {
 
             $booking = Booking::where('id', $id)
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            // Pesanan yang sudah ditolak atau selesai tidak dapat ditugaskan.
             if (in_array($booking->status, ['rejected', 'completed'])) {
                 throw ValidationException::withMessages([
                     'therapist_id' => 'Pesanan ini tidak dapat ditugaskan.',
@@ -344,7 +345,6 @@ class BookingController extends Controller
                 ]);
             }
 
-            // Cegah penugasan aktif ganda kepada terapis yang sama.
             $sameAssignment = BookingAssignment::where('booking_id', $booking->id)
                 ->where('therapist_id', $therapist->id)
                 ->whereIn('status', ['pending', 'accepted'])
@@ -370,8 +370,6 @@ class BookingController extends Controller
 
             $newEnd = $newStart->copy()->addHours(2);
 
-            // Hanya pending dan accepted yang belum ditolak admin,
-            // atau sudah disetujui admin, dianggap jadwal aktif.
             $existingAssignments = BookingAssignment::with('booking')
                 ->where('therapist_id', $therapist->id)
                 ->whereIn('status', ['pending', 'accepted'])
@@ -389,15 +387,15 @@ class BookingController extends Controller
                 ->lockForUpdate()
                 ->get();
 
-            foreach ($existingAssignments as $assignment) {
+            foreach ($existingAssignments as $existingAssignment) {
 
-                if ($assignment->booking_id == $booking->id) {
+                if ($existingAssignment->booking_id == $booking->id) {
                     continue;
                 }
 
                 $existingStart = Carbon::parse(
-                    $assignment->booking->booking_date . ' ' .
-                        $assignment->booking->booking_time
+                    $existingAssignment->booking->booking_date . ' ' .
+                        $existingAssignment->booking->booking_time
                 );
 
                 $existingEnd = $existingStart->copy()->addHours(2);
@@ -410,7 +408,6 @@ class BookingController extends Controller
                 }
             }
 
-            // Tandai penugasan aktif sebelumnya sebagai digantikan.
             BookingAssignment::where('booking_id', $booking->id)
                 ->where(function ($query) {
                     $query->where('status', 'pending')
@@ -428,8 +425,7 @@ class BookingController extends Controller
                     'updated_at' => now(),
                 ]);
 
-            // Buat penugasan baru.
-            BookingAssignment::create([
+            $newAssignment = BookingAssignment::create([
                 'booking_id' => $booking->id,
                 'therapist_id' => $therapist->id,
                 'status' => 'pending',
@@ -440,11 +436,34 @@ class BookingController extends Controller
                 'therapist_id' => $therapist->id,
                 'status' => 'pending',
             ]);
+
+            return $newAssignment->load([
+                'booking.user',
+                'therapist',
+            ]);
         });
+
+        // Kirim event setelah transaksi berhasil.
+        AssignmentCreated::dispatch([
+            'id' => $assignment->id,
+            'booking_id' => $assignment->booking_id,
+            'therapist_id' => $assignment->therapist_id,
+            'customer' => $assignment->booking->user->name,
+            'treatment' => $assignment->booking->treatment,
+            'booking_date' => $assignment->booking->booking_date,
+            'booking_time' => $assignment->booking->booking_time,
+            'place' => $assignment->booking->place,
+            'address' => $assignment->booking->address,
+            'gender' => $assignment->booking->gender,
+            'notes' => $assignment->booking->notes,
+            'status' => $assignment->status,
+            'admin_status' => $assignment->admin_status,
+        ]);
 
         return back()->with(
             'success',
             'Pekerjaan berhasil diberikan kepada terapis. Menunggu konfirmasi terapis.'
         );
+
     }
 }

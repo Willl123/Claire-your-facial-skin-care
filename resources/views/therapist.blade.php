@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Therapist Dashboard - CLAIRE</title>
-
+    @vite('resources/js/app.js')
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -1201,24 +1201,17 @@
 
         /* ================= RESPONSIVE ================= */
 
-        /* ================= RESPONSIVE DASHBOARD CLAIRE ================= */
-
-        /* Laptop dan layar menengah */
         @media (max-width: 1350px) {
-            body {
-                padding: 16px;
-            }
-
             .shell {
-                grid-template-columns: 80px minmax(0, 1fr);
+                grid-template-columns: 84px minmax(0, 1fr);
             }
 
             .right {
                 grid-column: 1 / -1;
-                padding: 0 28px 35px;
+                padding: 0 30px 40px;
                 display: grid;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 22px;
+                gap: 24px;
             }
 
             .right-top {
@@ -1226,706 +1219,77 @@
             }
         }
 
-        /* Tablet */
         @media (max-width: 1100px) {
             .top-row {
-                grid-template-columns: minmax(0, 1fr);
-            }
-
-            .feature-wrap {
-                width: 100%;
-            }
-
-            .feature {
-                width: 100%;
-            }
-
-            .main {
-                padding: 30px 22px;
-            }
-
-            .calendar-day {
-                min-height: 125px;
+                grid-template-columns: 1fr;
             }
         }
 
-        /* Tablet kecil dan HP */
         @media (max-width: 800px) {
-
-            html,
-            body {
-                width: 100%;
-                max-width: 100%;
-                overflow-x: hidden;
-            }
-
             body {
                 padding: 0;
-                font-size: 13px;
-                background: var(--soft);
             }
 
             .shell {
-                width: 100%;
-                max-width: 100%;
-                min-height: 100vh;
-                margin: 0;
                 border-radius: 0;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                box-shadow: none;
+                grid-template-columns: 1fr;
             }
-
-            /* SIDEBAR */
 
             .sidebar {
-                width: 100%;
-                min-width: 0;
                 flex-direction: row;
-                justify-content: flex-start;
-                align-items: center;
-                gap: 14px;
-                padding: 12px 16px;
+                padding: 14px 18px;
+                gap: 16px;
+                overflow-x: auto;
                 border-bottom: 1px solid var(--line);
-                background: #fff;
-                overflow: hidden;
-            }
-
-            .logo {
-                width: 38px;
-                height: 38px;
-                min-width: 38px;
-                font-size: 18px;
             }
 
             .side-nav {
                 flex-direction: row;
-                align-items: center;
-                gap: 5px;
-                min-width: 0;
-            }
-
-            .side-nav a,
-            .logout {
-                width: 40px;
-                height: 40px;
             }
 
             .sidebar form {
                 margin: 0 0 0 auto;
             }
 
-            /* MAIN */
-
             .main {
-                width: 100%;
-                min-width: 0;
-                padding: 22px 14px 28px;
+                padding: 22px 16px 24px;
             }
 
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 16px;
-                margin-bottom: 22px;
+            .right {
+                grid-template-columns: 1fr;
+                padding: 0 16px 36px;
             }
 
-            .header h1 {
-                font-size: 23px;
-                line-height: 1.4;
-            }
-
-            .header p {
-                font-size: 13px;
+            .box {
+                padding: 20px 16px;
             }
 
             .search-box {
-                width: 100%;
-                flex: none;
-                height: 46px;
-                padding: 0 14px;
-            }
-
-            .search-box input {
-                font-size: 13px;
-            }
-
-            /* ALERT */
-
-            .alert {
-                font-size: 12px;
-                padding: 12px;
-                overflow-wrap: anywhere;
-            }
-
-            /* KARTU */
-
-            .box {
-                width: 100%;
-                min-width: 0;
-                padding: 18px 14px;
-                border-radius: 13px;
-            }
-
-            .box-title {
-                align-items: flex-start;
-                flex-wrap: wrap;
-                gap: 10px;
-                margin-bottom: 16px;
-            }
-
-            .box-title h2,
-            .calendar-top h2 {
-                font-size: 17px;
-            }
-
-            .count-pill {
-                font-size: 10px;
-                padding: 6px 9px;
-            }
-
-            /* PEKERJAAN MASUK */
-
-            .top-row {
-                display: flex;
-                flex-direction: column;
-                gap: 20px;
-                width: 100%;
-                margin-bottom: 20px;
-            }
-
-            .incoming-section {
-                width: 100%;
-                min-width: 0;
-            }
-
-            .title-right {
-                flex-wrap: wrap;
-                justify-content: flex-end;
-                gap: 7px;
-            }
-
-            .slider-btn {
-                width: 32px;
-                height: 32px;
-            }
-
-            .incoming-track {
-                width: 100%;
-                gap: 10px;
-                padding-bottom: 10px;
-                scroll-snap-type: x mandatory;
-            }
-
-            .incoming-track .incoming-card {
-                flex: 0 0 88%;
-                min-width: 0;
-                padding: 14px;
-            }
-
-            .person {
-                gap: 9px;
-            }
-
-            .person b {
-                font-size: 13px;
-            }
-
-            .person small {
-                font-size: 11px;
-            }
-
-            .avatar {
-                width: 40px;
-                height: 40px;
-                min-width: 40px;
-            }
-
-            .job-info {
-                gap: 10px;
-                margin: 12px 0;
-            }
-
-            .job-info div {
-                font-size: 11.5px;
-            }
-
-            .job-info b {
-                max-width: 60%;
-            }
-
-            .assignment-actions {
-                gap: 7px;
-            }
-
-            .btn-accept,
-            .btn-reject {
-                padding: 10px 7px;
-                font-size: 11px;
-            }
-
-            .reject-reason {
-                font-size: 12px;
-            }
-
-            /* PEKERJAAN TERDEKAT */
-
-            .feature-wrap {
-                width: 100%;
-                min-width: 0;
-            }
-
-            .feature {
-                width: 100%;
-                padding: 20px 16px;
-            }
-
-            .feature-static {
-                min-height: 260px;
-            }
-
-            .stack {
-                width: 100%;
-                height: 365px;
-            }
-
-            .stack-card {
-                width: 100%;
-                height: 330px;
-                padding: 20px 16px;
-            }
-
-            .feature-top {
-                gap: 10px;
-            }
-
-            .feature-top b {
-                font-size: 13px;
-            }
-
-            .feature-top small {
-                font-size: 11px;
-            }
-
-            .feature-badge {
-                font-size: 10px;
-                padding: 5px 8px;
-            }
-
-            .feature .label {
-                margin-top: 17px;
-                font-size: 11px;
-            }
-
-            .feature .value {
-                font-size: 14px;
-            }
-
-            .feature-meta {
-                gap: 8px;
-            }
-
-            .feature-actions {
-                gap: 9px;
-                margin-top: 20px;
-            }
-
-            .btn-lime {
-                padding: 12px;
-                font-size: 13px;
-            }
-
-            .btn-round {
-                width: 44px;
-                height: 44px;
-                min-width: 44px;
-            }
-
-            /* KALENDER */
-
-            .calendar-card {
-                width: 100%;
-                min-width: 0;
-                padding: 15px 8px;
-                overflow: hidden;
-            }
-
-            .calendar-top {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-                margin-bottom: 15px;
-                padding: 0 5px;
-            }
-
-            .month-navigation {
-                width: 100%;
-                justify-content: space-between;
-                gap: 8px;
-            }
-
-            .month-navigation a {
-                width: 34px;
-                height: 34px;
-                flex-shrink: 0;
-            }
-
-            .month-name {
-                min-width: 0;
-                font-size: 13px;
-            }
-
-            /* Kalender tetap 7 kolom dan tidak melebar */
-
-            .calendar-grid {
-                width: 100%;
-                min-width: 0;
-                grid-template-columns: repeat(7, minmax(0, 1fr));
-                gap: 3px;
-            }
-
-            .weekday {
-                min-width: 0;
-                padding: 7px 0;
-                font-size: 10px;
-                text-align: center;
-            }
-
-            .calendar-day {
-                width: 100%;
-                min-width: 0;
-                min-height: 95px;
-                padding: 3px;
-                border-radius: 6px;
-                overflow-wrap: anywhere;
-            }
-
-            .day-number {
-                width: 22px;
-                height: 22px;
-                margin-bottom: 5px;
-                font-size: 10px;
-            }
-
-            .empty-day {
-                font-size: 9px;
-            }
-
-            /* Event kalender */
-
-            .booking-event {
-                width: 100%;
-                min-width: 0;
-                padding: 5px 3px;
-                margin-bottom: 4px;
-                border-radius: 5px;
-                overflow-wrap: anywhere;
-            }
-
-            .event-time {
-                font-size: 9px;
-            }
-
-            .event-treatment {
-                font-size: 9px;
-                line-height: 1.3;
-            }
-
-            .event-customer {
-                font-size: 8px;
-                line-height: 1.3;
-            }
-
-            .event-status {
-                margin-top: 4px;
-                padding: 3px 4px;
-                font-size: 8px;
-                line-height: 1.3;
-                white-space: normal;
-                overflow-wrap: anywhere;
-            }
-
-            .booking-details {
-                margin-top: 5px;
-                padding-top: 5px;
-            }
-
-            .booking-details summary {
-                font-size: 9px;
-                line-height: 1.4;
-            }
-
-            .details-content {
-                font-size: 10px;
-                line-height: 1.7;
-                overflow-wrap: anywhere;
-            }
-
-            .btn-complete {
-                padding: 6px 3px;
-                font-size: 9px;
-                line-height: 1.4;
-            }
-
-            .already-completed {
-                font-size: 9px;
-                line-height: 1.4;
-            }
-
-            .calendar-legend {
-                gap: 10px;
-                margin: 14px 5px 0;
-            }
-
-            .legend-item {
-                gap: 5px;
-                font-size: 10px;
-            }
-
-            .legend-dot {
-                width: 9px;
-                height: 9px;
-            }
-
-            /* KOLOM KANAN */
-
-            .right {
-                width: 100%;
-                min-width: 0;
-                padding: 0 14px 28px;
-                display: flex;
-                flex-direction: column;
-                gap: 20px;
-            }
-
-            .right-top {
-                width: 100%;
-                justify-content: space-between;
-                padding: 5px 2px;
-            }
-
-            .profile-link {
-                max-width: 80%;
-                font-size: 12px;
-            }
-
-            .profile-link .avatar {
-                width: 34px;
-                height: 34px;
-                min-width: 34px;
-            }
-
-            .right-title {
-                margin-bottom: 10px;
-            }
-
-            .right-title h3 {
-                font-size: 15px;
-            }
-
-            .right-title a {
-                font-size: 12px;
-            }
-
-            .panel {
-                width: 100%;
-                min-width: 0;
-                padding: 16px 14px;
-            }
-
-            .availability-row {
-                gap: 10px;
-            }
-
-            .availability {
-                font-size: 13px;
-            }
-
-            .availability-button {
-                padding: 9px 11px;
-                font-size: 11px;
-            }
-
-            .stat-line {
-                font-size: 12px;
-            }
-
-            .stat-line b {
-                font-size: 19px;
-            }
-
-            .today-item {
-                padding: 14px 0;
-            }
-
-            .today-person {
-                gap: 9px;
-            }
-
-            .today-person b {
-                font-size: 13px;
-            }
-
-            .today-person small {
-                font-size: 11px;
-            }
-
-            .today-meta {
-                flex-wrap: wrap;
-                gap: 10px;
-                font-size: 11px;
-            }
-
-            .today-status .assignment-status {
-                font-size: 10px;
-            }
-
-            .btn-wide {
-                padding: 12px;
-                font-size: 14px;
-            }
-
-            .notif {
-                padding: 14px;
-            }
-
-            .notif b {
-                font-size: 12px;
-            }
-
-            .notif small {
-                font-size: 11px;
-            }
-        }
-
-        /* HP kecil */
-        @media (max-width: 400px) {
-            .main {
-                padding-left: 10px;
-                padding-right: 10px;
-            }
-
-            .right {
-                padding-left: 10px;
-                padding-right: 10px;
-            }
-
-            .sidebar {
-                padding: 10px;
-                gap: 8px;
-            }
-
-            .side-nav {
-                gap: 2px;
-            }
-
-            .side-nav a,
-            .logout {
-                width: 36px;
-                height: 36px;
+                flex-basis: 100%;
             }
 
             .calendar-card {
-                padding-left: 5px;
-                padding-right: 5px;
+                overflow-x: auto;
             }
 
             .calendar-grid {
-                gap: 2px;
+                min-width: 720px;
             }
 
-            .weekday {
-                font-size: 9px;
-            }
-
-            .calendar-day {
-                min-height: 82px;
-                padding: 2px;
-            }
-
-            .day-number {
-                width: 19px;
-                height: 19px;
-                font-size: 9px;
-            }
-
-            .booking-event {
-                padding: 4px 2px;
-            }
-
-            .event-time {
-                font-size: 8px;
-            }
-
-            .event-treatment {
-                font-size: 8px;
-            }
-
-            .event-customer {
-                font-size: 7px;
-            }
-
-            .event-status {
-                font-size: 7px;
-                padding: 2px;
-            }
-
-            .booking-details summary {
-                font-size: 8px;
-            }
-
-            .btn-complete {
-                font-size: 8px;
+            .header h1 {
+                font-size: 25px;
             }
 
             .stack {
-                height: 375px;
+                height: 420px;
             }
 
             .stack-card {
-                height: 335px;
-            }
-
-            .feature-badge {
-                font-size: 9px;
-                padding: 4px 6px;
+                height: 380px;
             }
 
             .incoming-track .incoming-card {
-                flex-basis: 92%;
-            }
-        }
-
-        /* HP sangat kecil */
-        @media (max-width: 340px) {
-            .logo {
-                width: 34px;
-                height: 34px;
-                min-width: 34px;
-                
-            }
-
-            .side-nav a,
-            .logout {
-                width: 32px;
-                height: 32px;
-            }
-
-            .calendar-day {
-                min-height: 75px;
-            }
-
-            .event-customer {
-                display: none;
-            }
-
-            .calendar-legend {
-                gap: 7px;
-            }
-
-            .legend-item {
-                font-size: 9px;
+                flex-basis: 85%;
             }
         }
     </style>
@@ -1933,6 +1297,10 @@
 
 
 <body>
+    <div
+        id="therapistDashboard"
+        data-therapist-id="{{ Auth::id() }}"
+        data-card-url="{{ route('therapist.assignment.card', ['id' => '__ID__']) }}"></div>
 
     {{-- ================= FUNGSI AVATAR (FOTO + CADANGAN HURUF) ================= --}}
     @php
@@ -2139,128 +1507,9 @@
                     <div class="incoming-track" id="incomingTrack">
 
                         @foreach($incomingAssignments as $assignment)
-
-                        @php
-                        $booking = $assignment->booking;
-                        $avatarColor = $palette[$booking->id % 4];
-                        @endphp
-
-                        <div class="incoming-card">
-
-                            <div class="person">
-                                {!! $avatar($booking->user, $avatarColor) !!}
-
-                                <div>
-                                    <b>{{ $booking->user->name ?? 'Customer' }}</b>
-                                    <small>
-                                        {{ $booking->place === 'home' ? 'Home Service' : 'Klinik' }}
-                                        · {{ $booking->phone ?? '-' }}
-                                    </small>
-                                </div>
-                            </div>
-
-                            <div class="job-info">
-                                <div>
-                                    <span>Treatment</span>
-                                    <b>{{ $booking->treatment }}</b>
-                                </div>
-
-                                <div>
-                                    <span>Tanggal</span>
-                                    <b>{{ \Carbon\Carbon::parse($booking->booking_date)->translatedFormat('d F Y') }}</b>
-                                </div>
-
-                                <div>
-                                    <span>Jam</span>
-                                    <b>{{ substr($booking->booking_time, 0, 5) }} WIB</b>
-                                </div>
-                            </div>
-
-                            <div class="incoming-bottom">
-
-                                @if($assignment->status === 'pending')
-
-                                <span class="assignment-status pending">
-                                    Menunggu Respons
-                                </span>
-
-                                @elseif($assignment->status === 'rejected')
-
-                                <span class="assignment-status rejected">
-                                    Pekerjaan Ditolak
-                                </span>
-
-                                @endif
-
-
-                                @if($assignment->status === 'pending')
-
-                                <!-- ACCEPT -->
-                                <div class="assignment-actions">
-
-                                    <form
-                                        action="{{ route('therapist.assignment.accept', $assignment->id) }}"
-                                        method="POST"
-                                        style="flex: 1;"
-                                        onsubmit="return confirm('Apakah kamu yakin menerima pekerjaan ini?')">
-
-                                        @csrf
-
-                                        <button type="submit" class="btn-accept" style="width:100%;">
-                                            Terima Pekerjaan
-                                        </button>
-
-                                    </form>
-
-                                </div>
-
-
-                                <!-- REJECT -->
-                                <form
-                                    action="{{ route('therapist.assignment.reject', $assignment->id) }}"
-                                    method="POST">
-
-                                    @csrf
-
-                                    <textarea
-                                        name="rejection_reason"
-                                        class="reject-reason"
-                                        rows="2"
-                                        placeholder="Tuliskan alasan penolakan..."
-                                        required></textarea>
-
-                                    <div class="assignment-actions">
-
-                                        <button
-                                            type="submit"
-                                            class="btn-reject"
-                                            onclick="return confirm('Apakah kamu yakin menolak pekerjaan ini?')">
-
-                                            Tolak Pekerjaan
-
-                                        </button>
-
-                                    </div>
-
-                                </form>
-
-                                @elseif($assignment->status === 'rejected')
-
-                                <div class="rejection-info">
-
-                                    <strong>Alasan Penolakan:</strong>
-                                    <br>
-
-                                    {{ $assignment->rejection_reason ?? 'Tidak ada alasan.' }}
-
-                                </div>
-
-                                @endif
-
-                            </div>
-
-                        </div>
-
+                        @include('partials-therapist-assignment-card', [
+                        'assignment' => $assignment
+                        ])
                         @endforeach
 
                     </div>

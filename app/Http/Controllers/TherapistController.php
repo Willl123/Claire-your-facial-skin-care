@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
+use App\Events\AssignmentResponded;
+
 class TherapistController extends Controller
 {
     // =========================================
@@ -191,7 +193,7 @@ class TherapistController extends Controller
 
     public function acceptAssignment($id)
     {
-        DB::transaction(function () use ($id) {
+        $assignment = DB::transaction(function () use ($id) {
 
             $assignment = BookingAssignment::where('id', $id)
                 ->where('therapist_id', Auth::id())
@@ -208,7 +210,27 @@ class TherapistController extends Controller
                 'admin_status' => 'pending',
                 'admin_responded_at' => null,
             ]);
+
+            return $assignment->load([
+                'booking.user',
+                'therapist',
+            ]);
         });
+
+        AssignmentResponded::dispatch([
+            'id' => $assignment->id,
+            'booking_id' => $assignment->booking_id,
+            'therapist_id' => $assignment->therapist_id,
+            'therapist_name' => $assignment->therapist->name,
+            'customer' => $assignment->booking->user->name,
+            'treatment' => $assignment->booking->treatment,
+            'booking_date' => $assignment->booking->booking_date,
+            'booking_time' => $assignment->booking->booking_time,
+            'status' => $assignment->status,
+            'admin_status' => $assignment->admin_status,
+            'rejection_reason' => null,
+            'responded_at' => $assignment->responded_at?->toDateTimeString(),
+        ]);
 
         return back()->with(
             'success',
@@ -227,7 +249,7 @@ class TherapistController extends Controller
             'rejection_reason' => 'required|string|max:1000',
         ]);
 
-        DB::transaction(function () use ($request, $id) {
+        $assignment = DB::transaction(function () use ($request, $id) {
 
             $assignment = BookingAssignment::where('id', $id)
                 ->where('therapist_id', Auth::id())
@@ -248,18 +270,59 @@ class TherapistController extends Controller
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            // Lepaskan terapis dari booking.
-            // Status customer tetap pending.
             if ($booking->therapist_id == Auth::id()) {
                 $booking->update([
                     'therapist_id' => null,
                 ]);
             }
+
+            return $assignment->load([
+                'booking.user',
+                'therapist',
+            ]);
         });
+
+        AssignmentResponded::dispatch([
+            'id' => $assignment->id,
+            'booking_id' => $assignment->booking_id,
+            'therapist_id' => $assignment->therapist_id,
+            'therapist_name' => $assignment->therapist->name,
+            'customer' => $assignment->booking->user->name,
+            'treatment' => $assignment->booking->treatment,
+            'booking_date' => $assignment->booking->booking_date,
+            'booking_time' => $assignment->booking->booking_time,
+            'status' => $assignment->status,
+            'admin_status' => $assignment->admin_status,
+            'rejection_reason' => $assignment->rejection_reason,
+            'responded_at' => $assignment->responded_at?->toDateTimeString(),
+        ]);
 
         return back()->with(
             'success',
             'Pekerjaan berhasil ditolak. Admin dapat memilih terapis lain.'
         );
+    }
+
+
+
+    // =========================================
+    // MENGAMBIL HTML KARTU PENUGASAN WORKER
+    // =========================================
+
+    public function assignmentCard($id)
+    {
+        // Cari penugasan berdasarkan ID dan pastikan
+        // penugasan tersebut milik Worker yang sedang login.
+        $assignment = BookingAssignment::with(['booking.user'])
+            ->where('id', $id)
+            ->where('therapist_id', Auth::id())
+            ->firstOrFail();
+
+        return response()->json([
+            'html' => view(
+                'partials-therapist-assignment-card',
+                compact('assignment')
+            )->render(),
+        ]);
     }
 }

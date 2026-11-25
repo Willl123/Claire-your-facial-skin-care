@@ -162,6 +162,11 @@ Route::middleware(['auth', 'role:therapist'])->group(function () {
     Route::post('/therapist/assignment/{id}/complete', [TherapistController::class, 'complete'])
         ->name('therapist.assignment.complete');
 
+    Route::get('/therapist/assignment/{id}/card', [
+        TherapistController::class,
+        'assignmentCard'
+    ])->name('therapist.assignment.card');
+
 
     // Profil Worker
     Route::get('/therapist/profile', [CustomerController::class, 'therapistProfile'])
@@ -169,6 +174,8 @@ Route::middleware(['auth', 'role:therapist'])->group(function () {
 
     Route::post('/therapist/profile/photo', [CustomerController::class, 'uploadTherapistPhoto'])
         ->name('therapist.profile.photo');
+
+        
 });
 
 
