@@ -31,6 +31,7 @@
             --done-bg: #e6e6fb;
             --bad: #b03a2e;
             --bad-bg: #fbe3df;
+            --shadow: 0 8px 24px rgba(40, 90, 65, 0.08);
             --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
         }
 
@@ -38,6 +39,15 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 24px;
+        }
+
+        [hidden] {
+            display: none !important;
         }
 
         body {
@@ -53,6 +63,16 @@
         input,
         textarea {
             font-family: inherit;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--brand);
+            outline-offset: 2px;
+        }
+
+        button.is-loading {
+            opacity: 0.6;
+            pointer-events: none;
         }
 
         .ic {
@@ -78,11 +98,17 @@
             display: grid;
             grid-template-columns: 92px minmax(0, 1fr) 350px;
             overflow: hidden;
+            overflow: clip;
         }
 
         /* ================= SIDEBAR ================= */
 
         .sidebar {
+            position: sticky;
+            top: 24px;
+            align-self: start;
+            height: calc(100vh - 48px);
+            z-index: 5;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -111,6 +137,7 @@
 
         .side-nav a,
         .logout {
+            position: relative;
             width: 46px;
             height: 46px;
             display: grid;
@@ -131,20 +158,59 @@
         }
 
         .side-nav a.active {
-            color: var(--lime);
-            background: #f1f8e6;
-        }
-
-        .side-nav a.active .ic {
-            stroke: var(--lime);
-        }
-
-        .sidebar form {
-            margin-top: auto;
+            color: var(--brand);
+            background: #e8f4dc;
         }
 
         .logout:hover {
             color: var(--bad);
+        }
+
+        .side-nav a::after,
+        .logout::after {
+            content: attr(data-label);
+            position: absolute;
+            left: calc(100% + 10px);
+            top: 50%;
+            transform: translateY(-50%) translateX(-4px);
+            padding: 6px 11px;
+            border-radius: 8px;
+            background: var(--ink);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.15s;
+            z-index: 30;
+        }
+
+        .side-nav a:hover::after,
+        .logout:hover::after {
+            opacity: 1;
+            transform: translateY(-50%);
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: 2px;
+            right: 0;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 99px;
+            background: var(--link);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            display: grid;
+            place-items: center;
+            border: 2px solid #fff;
+        }
+
+        .sidebar form {
+            margin-top: auto;
         }
 
         /* ================= MAIN ================= */
@@ -160,7 +226,7 @@
             align-items: flex-start;
             gap: 20px;
             flex-wrap: wrap;
-            margin-bottom: 28px;
+            margin-bottom: 22px;
         }
 
         .header h1 {
@@ -175,16 +241,36 @@
             font-size: 15px;
         }
 
+        .header .clock {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: var(--soft);
+            border: 1px solid var(--line);
+            color: var(--brand);
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+
         .search-box {
             flex: 0 1 420px;
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 0 20px;
+            padding: 0 16px 0 20px;
             height: 54px;
             background: var(--soft);
+            border: 1px solid transparent;
             border-radius: 14px;
             color: var(--muted);
+            transition: 0.2s;
+        }
+
+        .search-box:focus-within {
+            background: #fff;
+            border-color: var(--brand);
+            box-shadow: 0 0 0 4px rgba(43, 122, 95, 0.1);
         }
 
         .search-box input {
@@ -197,14 +283,79 @@
             color: var(--ink);
         }
 
+        .search-box kbd {
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--muted);
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .search-note {
+            margin-bottom: 18px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            background: var(--wait-bg);
+            color: var(--wait);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* RINGKASAN CEPAT */
+
+        .quick {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .quick a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            background: var(--soft);
+            color: var(--ink);
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .quick a:hover {
+            background: #fff;
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .quick a b {
+            font-size: 20px;
+            color: var(--brand);
+        }
+
+        .quick a.warn b {
+            color: var(--wait);
+        }
+
         /* ================= ALERT ================= */
 
         .alert {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
             padding: 13px 17px;
             margin-bottom: 18px;
             border-radius: 12px;
             font-size: 13px;
             border-left: 4px solid;
+            transition: opacity 0.4s;
         }
 
         .alert.success {
@@ -217,6 +368,20 @@
             background: var(--bad-bg);
             color: var(--bad);
             border-color: var(--bad);
+        }
+
+        .alert-close {
+            border: none;
+            background: transparent;
+            color: inherit;
+            font-size: 18px;
+            line-height: 1;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .alert-close:hover {
+            opacity: 1;
         }
 
         /* ================= KARTU UMUM ================= */
@@ -249,6 +414,11 @@
             font-size: 12px;
             font-weight: 600;
             white-space: nowrap;
+        }
+
+        .count-pill.green {
+            background: var(--ok-bg);
+            color: var(--ok);
         }
 
         .top-row {
@@ -349,7 +519,7 @@
             gap: 14px;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
-            padding-bottom: 12px;
+            padding: 4px 2px 14px;
             scrollbar-width: thin;
         }
 
@@ -362,6 +532,13 @@
             border: 1px solid var(--line);
             border-radius: 14px;
             background: var(--soft);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .incoming-track .incoming-card:hover {
+            background: #fff;
+            box-shadow: var(--shadow);
+            transform: translateY(-3px);
         }
 
         .job-info {
@@ -474,7 +651,7 @@
         }
 
         .empty-incoming {
-            padding: 28px;
+            padding: 34px 28px;
             background: var(--soft);
             border-radius: 12px;
             color: var(--muted);
@@ -493,8 +670,9 @@
             overflow: hidden;
             padding: 28px;
             border-radius: 16px;
-            background: var(--card);
+            background: linear-gradient(145deg, #55a08a 0%, var(--card) 55%, #3f7f6c 100%);
             color: #fff;
+            box-shadow: 0 14px 30px rgba(74, 143, 123, 0.28);
         }
 
         .feature::after {
@@ -581,7 +759,7 @@
             display: block;
             text-align: center;
             padding: 15px;
-            border-radius: 6px;
+            border-radius: 8px;
             background: var(--lime);
             color: var(--lime-ink);
             font-size: 15px;
@@ -677,6 +855,137 @@
             font-weight: 600;
         }
 
+        /* ================= CHAT CUSTOMER (RINGKAS) ================= */
+
+        .chat-section {
+            margin-bottom: 26px;
+            padding: 18px 20px 8px;
+        }
+
+        .chat-section .box-title {
+            margin-bottom: 8px;
+        }
+
+        .chat-section .box-title h2 {
+            font-size: 17px;
+        }
+
+        .chat-list {
+            display: flex;
+            flex-direction: column;
+            max-height: 290px;
+            overflow-y: auto;
+            margin: 0 -8px;
+            padding: 0 8px;
+            scrollbar-width: thin;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--line);
+            border-radius: 10px;
+            color: var(--ink);
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+
+        .chat-item:last-child {
+            border-bottom: none;
+        }
+
+        .chat-item:hover {
+            background: #f3faf4;
+        }
+
+        .chat-item .avatar {
+            width: 38px;
+            height: 38px;
+            font-size: 15px;
+        }
+
+        .chat-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .chat-info strong {
+            font-size: 13.5px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-info span {
+            font-size: 12px;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-side {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .chat-side time {
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .chat-go {
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: #e6f7e9;
+            color: #00880f;
+            transition: 0.15s;
+        }
+
+        .chat-go .ic {
+            width: 15px;
+            height: 15px;
+        }
+
+        .chat-item:hover .chat-go {
+            background: #00a94f;
+            color: #fff;
+        }
+
+        .chat-empty {
+            padding: 22px 10px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .chat-empty p {
+            margin-bottom: 3px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .chat-empty small {
+            font-size: 12px;
+        }
+
+        @media (max-width: 500px) {
+            .chat-side time {
+                display: none;
+            }
+        }
+
         /* ================= KALENDER ================= */
 
         .calendar-top {
@@ -718,6 +1027,13 @@
             color: #fff;
         }
 
+        .month-navigation a.today-btn {
+            width: auto;
+            padding: 0 14px;
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+
         .month-name {
             min-width: 130px;
             text-align: center;
@@ -747,9 +1063,27 @@
             background: var(--soft);
         }
 
+        .calendar-day.is-today {
+            background: #fff;
+            box-shadow: inset 0 0 0 2px var(--brand);
+        }
+
         .calendar-day.other-month {
             background: transparent;
             border: 1px dashed var(--line);
+        }
+
+        .day-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .day-name {
+            display: none;
+            font-size: 13.5px;
+            font-weight: 600;
         }
 
         .day-number {
@@ -758,7 +1092,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 8px;
             border-radius: 50%;
             font-size: 12.5px;
             font-weight: 600;
@@ -779,10 +1112,20 @@
             font-size: 12px;
         }
 
+        .calendar-empty-note {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            background: var(--soft);
+            color: var(--muted);
+            text-align: center;
+            font-size: 13px;
+        }
+
         .booking-event {
             padding: 9px 10px;
             margin-bottom: 7px;
-            border-radius: 6px;
+            border-radius: 8px;
             overflow: hidden;
             color: #fff;
         }
@@ -1010,15 +1353,19 @@
         }
 
         .availability {
-            font-size: 14px;
+            padding: 7px 13px;
+            border-radius: 999px;
+            font-size: 13px;
             font-weight: 600;
         }
 
         .availability.active {
+            background: var(--ok-bg);
             color: var(--ok);
         }
 
         .availability.inactive {
+            background: var(--bad-bg);
             color: var(--bad);
         }
 
@@ -1158,7 +1505,7 @@
             font-size: 16px;
             font-weight: 600;
             text-decoration: none;
-            border-radius: 4px;
+            border-radius: 8px;
             transition: 0.2s;
         }
 
@@ -1236,10 +1583,16 @@
             }
 
             .sidebar {
+                position: sticky;
+                top: 0;
+                height: auto;
                 flex-direction: row;
-                padding: 14px 18px;
-                gap: 16px;
+                align-items: center;
+                padding: 12px 16px;
+                gap: 14px;
                 overflow-x: auto;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(8px);
                 border-bottom: 1px solid var(--line);
             }
 
@@ -1249,6 +1602,11 @@
 
             .sidebar form {
                 margin: 0 0 0 auto;
+            }
+
+            .side-nav a::after,
+            .logout::after {
+                display: none;
             }
 
             .main {
@@ -1264,16 +1622,16 @@
                 padding: 20px 16px;
             }
 
+            .chat-section {
+                padding: 16px 14px 6px;
+            }
+
             .search-box {
                 flex-basis: 100%;
             }
 
-            .calendar-card {
-                overflow-x: auto;
-            }
-
-            .calendar-grid {
-                min-width: 720px;
+            .search-box kbd {
+                display: none;
             }
 
             .header h1 {
@@ -1290,6 +1648,41 @@
 
             .incoming-track .incoming-card {
                 flex-basis: 85%;
+            }
+
+            /* Kalender berubah jadi daftar agenda di HP */
+            .calendar-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .weekday {
+                display: none;
+            }
+
+            .calendar-day {
+                min-height: 0;
+            }
+
+            .calendar-day.is-empty:not(.is-today) {
+                display: none;
+            }
+
+            .day-name {
+                display: block;
+            }
+
+            .calendar-top {
+                gap: 10px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+                animation: none !important;
+                scroll-behavior: auto !important;
             }
         }
     </style>
@@ -1349,6 +1742,12 @@
     '<div class="avatar"' . $style . '>' . $initial . $img . '</div>'
     );
     };
+
+    // Data ringkasan yang dipakai di beberapa bagian
+    $palette = ['#ee8b7c', '#8c8cf0', '#7cc255', '#5fb0d4'];
+    $pendingIncoming = $incomingAssignments->where('status', 'pending')->count();
+    $todayAssignments = $calendarAssignments->get(now()->format('Y-m-d'), collect());
+    $chatCount = $chatAssignments->count();
     @endphp
 
     <div class="shell">
@@ -1360,7 +1759,7 @@
 
             <ul class="side-nav">
                 <li>
-                    <a href="{{ route('therapist.dashboard') }}" class="active" title="My Schedule">
+                    <a href="{{ route('therapist.dashboard') }}" class="active" data-spy="top" data-label="Dashboard" title="Dashboard">
                         <svg class="ic" viewBox="0 0 24 24">
                             <rect x="3" y="3" width="7" height="7" rx="1.5" />
                             <rect x="14" y="3" width="7" height="7" rx="1.5" />
@@ -1371,15 +1770,27 @@
                 </li>
 
                 <li>
-                    <a href="" title="Chat">
+                    <a href="#chats" data-spy="#chats" data-label="Chat" title="Chat">
                         <svg class="ic" viewBox="0 0 24 24">
                             <path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-5.4A8 8 0 1 1 21 12z" />
+                        </svg>
+                        @if($chatCount > 0)
+                        <span class="nav-badge">{{ $chatCount }}</span>
+                        @endif
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#bookings" data-spy="#bookings" data-label="Jadwal" title="Jadwal">
+                        <svg class="ic" viewBox="0 0 24 24">
+                            <rect x="3" y="4" width="18" height="18" rx="2" />
+                            <path d="M16 2v4M8 2v4M3 10h18" />
                         </svg>
                     </a>
                 </li>
 
                 <li>
-                    <a href="{{ route('therapist.profile') }}" title="Profil Saya">
+                    <a href="{{ route('therapist.profile') }}" data-label="Profil Saya" title="Profil Saya">
                         <svg class="ic" viewBox="0 0 24 24">
                             <circle cx="12" cy="8" r="4" />
                             <path d="M4 21a8 8 0 0 1 16 0" />
@@ -1390,7 +1801,7 @@
 
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="logout" title="Logout">
+                <button type="submit" class="logout" data-label="Logout" title="Logout">
                     <svg class="ic" viewBox="0 0 24 24">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
                     </svg>
@@ -1409,6 +1820,7 @@
                 <div>
                     <h1>Dashboard Terapis</h1>
                     <p>Selamat datang, {{ Auth::user()->name }}</p>
+                    <span class="clock" id="clock">{{ now()->translatedFormat('l, d F Y') }}</span>
                 </div>
 
                 <label class="search-box">
@@ -1417,6 +1829,7 @@
                         <path d="M21 21l-4.5-4.5" />
                     </svg>
                     <input type="search" id="searchInput" placeholder="Cari pelanggan atau treatment...">
+                    <kbd>/</kbd>
                 </label>
 
             </div>
@@ -1437,16 +1850,36 @@
 
             @if($errors->any())
             <div class="alert error">
-                @foreach($errors->all() as $error)
-                <div>{{ $error }}</div>
-                @endforeach
+                <div>
+                    @foreach($errors->all() as $error)
+                    <div>{{ $error }}</div>
+                    @endforeach
+                </div>
             </div>
             @endif
 
 
-            @php
-            $palette = ['#ee8b7c', '#8c8cf0', '#7cc255', '#5fb0d4'];
+            <!-- RINGKASAN CEPAT -->
+            <div class="quick">
+                <a href="#bookings">
+                    <b>{{ $todayAssignments->count() }}</b> jadwal hari ini
+                </a>
 
+                <a href="#incoming" class="warn">
+                    <b>{{ $pendingIncoming }}</b> menunggu respons
+                </a>
+
+                <a href="#chats">
+                    <b>{{ $chatCount }}</b> percakapan
+                </a>
+            </div>
+
+            <div class="search-note" id="searchNote" hidden>
+                Tidak ada hasil untuk "<span id="searchWord"></span>".
+            </div>
+
+
+            @php
             $startAt = function ($item) {
             return \Carbon\Carbon::parse($item->booking->booking_date)->format('Y-m-d')
             . ' ' . substr($item->booking->booking_time, 0, 5);
@@ -1480,7 +1913,7 @@
                         <div class="title-right">
 
                             <span class="count-pill">
-                                {{ $incomingAssignments->where('status', 'pending')->count() }}
+                                {{ $pendingIncoming }}
                                 Menunggu Respons
                             </span>
 
@@ -1622,6 +2055,64 @@
             </div>
 
 
+            <!-- ================= CHAT CUSTOMER ================= -->
+            <section class="box chat-section" id="chats">
+
+                <div class="box-title">
+                    <h2>Chat</h2>
+
+                    <span class="count-pill green">
+                        {{ $chatCount }} Percakapan
+                    </span>
+                </div>
+
+                <div class="chat-list">
+
+                    @forelse($chatAssignments as $assignment)
+
+                    @php
+                    $booking = $assignment->booking;
+                    $customer = $booking->user;
+                    @endphp
+
+                    <a href="{{ route('chat.open', $booking->id) }}" class="chat-item">
+
+                        {!! $avatar($customer, $palette[$booking->id % 4]) !!}
+
+                        <div class="chat-info">
+                            <strong>{{ $customer->name ?? 'Customer' }}</strong>
+                            <span>{{ $booking->treatment }} · {{ $booking->place === 'home' ? 'Home Service' : 'Klinik' }}</span>
+                        </div>
+
+                        <div class="chat-side">
+                            <time>
+                                {{ \Carbon\Carbon::parse($booking->booking_date)->translatedFormat('d M') }}
+                                · {{ substr($booking->booking_time, 0, 5) }}
+                            </time>
+
+                            <span class="chat-go">
+                                <svg class="ic" viewBox="0 0 24 24">
+                                    <path d="M9 6l6 6-6 6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                    </a>
+
+                    @empty
+
+                    <div class="chat-empty">
+                        <p>Belum ada percakapan.</p>
+                        <small>Chat tersedia setelah penugasan disetujui Admin.</small>
+                    </div>
+
+                    @endforelse
+
+                </div>
+
+            </section>
+
+
             <!-- ================= MY SCHEDULE CALENDAR ================= -->
             <section class="box calendar-card" id="bookings">
 
@@ -1631,7 +2122,7 @@
 
                     <div class="month-navigation">
 
-                        <a href="{{ route('therapist.dashboard', ['month' => $previousMonth]) }}">
+                        <a href="{{ route('therapist.dashboard', ['month' => $previousMonth]) }}" aria-label="Bulan sebelumnya">
                             &lsaquo;
                         </a>
 
@@ -1639,8 +2130,12 @@
                             {{ $currentMonth->translatedFormat('F Y') }}
                         </span>
 
-                        <a href="{{ route('therapist.dashboard', ['month' => $nextMonth]) }}">
+                        <a href="{{ route('therapist.dashboard', ['month' => $nextMonth]) }}" aria-label="Bulan berikutnya">
                             &rsaquo;
+                        </a>
+
+                        <a href="{{ route('therapist.dashboard') }}" class="today-btn">
+                            Hari Ini
                         </a>
 
                     </div>
@@ -1675,10 +2170,16 @@
                     @endphp
 
 
-                    <div class="calendar-day {{ $isCurrentMonth ? '' : 'other-month' }}">
+                    <div class="calendar-day {{ $isCurrentMonth ? '' : 'other-month' }} {{ $dayAssignments->isEmpty() ? 'is-empty' : 'has-events' }} {{ $isToday ? 'is-today' : '' }}">
 
-                        <div class="day-number {{ $isToday ? 'today' : '' }}">
-                            {{ $day->format('d') }}
+                        <div class="day-head">
+                            <div class="day-number {{ $isToday ? 'today' : '' }}">
+                                {{ $day->format('d') }}
+                            </div>
+
+                            <span class="day-name">
+                                {{ $day->translatedFormat('l, d F') }}{{ $isToday ? ' · Hari ini' : '' }}
+                            </span>
                         </div>
 
 
@@ -1855,6 +2356,12 @@
 
                 </div>
 
+                @if($calendarAssignments->flatten(1)->isEmpty())
+                <div class="calendar-empty-note">
+                    Belum ada jadwal pada bulan ini.
+                </div>
+                @endif
+
 
                 <!-- LEGEND -->
                 <div class="calendar-legend">
@@ -1882,7 +2389,7 @@
             <!-- NOTIFIKASI + PROFIL -->
             <div class="right-top">
 
-                <a href="#incoming" class="bell {{ $incomingAssignments->where('status', 'pending')->count() > 0 ? 'has-new' : '' }}" title="Pekerjaan masuk">
+                <a href="#incoming" class="bell {{ $pendingIncoming > 0 ? 'has-new' : '' }}" title="Pekerjaan masuk">
                     <svg class="ic" viewBox="0 0 24 24">
                         <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" />
                     </svg>
@@ -1961,10 +2468,6 @@
 
 
             <!-- JADWAL HARI INI -->
-            @php
-            $todayAssignments = $calendarAssignments->get(now()->format('Y-m-d'), collect());
-            @endphp
-
             <div>
                 <div class="right-title">
                     <h3>Jadwal Hari Ini</h3>
@@ -2042,11 +2545,11 @@
                     <h3>Notifikasi Terbaru</h3>
                 </div>
 
-                @if($incomingAssignments->where('status', 'pending')->count() > 0)
+                @if($pendingIncoming > 0)
 
                 <a href="#incoming" class="notif">
                     <div>
-                        <b>{{ $incomingAssignments->where('status', 'pending')->count() }} pekerjaan menunggu respons</b>
+                        <b>{{ $pendingIncoming }} pekerjaan menunggu respons</b>
                         <small>Terima atau tolak di bagian Pekerjaan Masuk</small>
                     </div>
                     <svg class="ic" viewBox="0 0 24 24">
@@ -2075,15 +2578,139 @@
         // ================= PENCARIAN =================
 
         const searchInput = document.getElementById('searchInput');
+        const searchNote = document.getElementById('searchNote');
+        const searchWord = document.getElementById('searchWord');
 
         searchInput.addEventListener('input', function() {
-            const keyword = searchInput.value.toLowerCase();
+            const keyword = searchInput.value.trim().toLowerCase();
+            let visible = 0;
 
-            document.querySelectorAll('.incoming-card, .booking-event').forEach(function(item) {
+            document.querySelectorAll('.incoming-card, .booking-event, .chat-item').forEach(function(item) {
                 const cocok = item.textContent.toLowerCase().includes(keyword);
                 item.style.display = cocok ? '' : 'none';
+
+                if (cocok) visible++;
             });
+
+            searchWord.textContent = searchInput.value.trim();
+            searchNote.hidden = !keyword || visible > 0;
         });
+
+        // Tekan "/" untuk langsung mengetik di kotak pencarian
+        document.addEventListener('keydown', function(event) {
+            const tag = (event.target.tagName || '').toLowerCase();
+
+            if (event.key === '/' && tag !== 'input' && tag !== 'textarea') {
+                event.preventDefault();
+                searchInput.focus();
+            }
+
+            if (event.key === 'Escape' && document.activeElement === searchInput) {
+                searchInput.value = '';
+                searchInput.dispatchEvent(new Event('input'));
+                searchInput.blur();
+            }
+        });
+
+
+        // ================= TANGGAL & JAM =================
+
+        const clock = document.getElementById('clock');
+
+        function updateClock() {
+            const now = new Date();
+
+            const tanggal = now.toLocaleDateString('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+
+            const jam = now.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit'
+            }).replace('.', ':');
+
+            clock.textContent = tanggal + ' · ' + jam;
+        }
+
+        updateClock();
+        setInterval(updateClock, 30000);
+
+
+        // ================= NOTIFIKASI: TUTUP / HILANG OTOMATIS =================
+
+        document.querySelectorAll('.alert').forEach(function(alertBox) {
+            const close = document.createElement('button');
+
+            close.type = 'button';
+            close.className = 'alert-close';
+            close.setAttribute('aria-label', 'Tutup');
+            close.innerHTML = '&times;';
+
+            close.addEventListener('click', function() {
+                alertBox.remove();
+            });
+
+            alertBox.appendChild(close);
+
+            if (alertBox.classList.contains('success')) {
+                setTimeout(function() {
+                    alertBox.style.opacity = '0';
+                    setTimeout(function() {
+                        alertBox.remove();
+                    }, 400);
+                }, 6000);
+            }
+        });
+
+
+        // ================= CEGAH KLIK GANDA SAAT KIRIM FORM =================
+
+        document.addEventListener('submit', function(event) {
+            if (event.defaultPrevented) return; // dibatalkan lewat confirm()
+
+            const buttons = event.target.querySelectorAll('button[type="submit"]');
+
+            setTimeout(function() {
+                buttons.forEach(function(btn) {
+                    btn.classList.add('is-loading');
+                });
+            }, 0);
+        });
+
+
+        // ================= MENU SAMPING: MENYALA SESUAI BAGIAN =================
+
+        const spyLinks = Array.from(document.querySelectorAll('.side-nav a[data-spy]'));
+
+        function spyScroll() {
+            let current = spyLinks.find(function(a) {
+                return a.dataset.spy === 'top';
+            });
+
+            const batas = window.innerHeight * 0.4;
+
+            spyLinks.forEach(function(a) {
+                if (a.dataset.spy === 'top') return;
+
+                const target = document.querySelector(a.dataset.spy);
+
+                if (target && target.getBoundingClientRect().top <= batas) {
+                    current = a;
+                }
+            });
+
+            spyLinks.forEach(function(a) {
+                a.classList.toggle('active', a === current);
+            });
+        }
+
+        window.addEventListener('scroll', spyScroll, {
+            passive: true
+        });
+        spyScroll();
 
 
         // ================= PEKERJAAN MASUK: GESER KE SAMPING =================

@@ -40,6 +40,34 @@ class TherapistController extends Controller
             ->latest()
             ->get();
 
+        // Daftar Customer yang bisa dihubungi melalui chat.
+        $chatAssignments = BookingAssignment::with([
+            'booking.user',
+            'chat'
+        ])
+            ->where('therapist_id', $therapistId)
+            ->where('admin_status', 'approved')
+            ->where(function ($query) {
+                $query->where('status', 'accepted')
+                    ->orWhere(function ($query) {
+                        // Penugasan selesai masih bisa chat selama 24 jam.
+                        $query->where('status', 'completed')
+                            ->where('responded_at', '>=', now()->subHours(24));
+                    });
+            })
+            ->whereHas('booking', function ($query) {
+                $query->whereIn('status', ['approved', 'completed']);
+            })
+            ->latest()
+            ->get()
+            ->filter(function ($assignment) {
+                // Sembunyikan chat yang sudah melewati waktu kedaluwarsa.
+                return !$assignment->chat
+                    || !$assignment->chat->expires_at
+                    || $assignment->chat->expires_at->isFuture();
+            })
+            ->values();
+
         // Riwayat penugasan untuk kalender.
         // Termasuk tugas yang diterima, selesai, dan ditolak admin.
         $calendarAssignments = BookingAssignment::with(['booking.user'])
@@ -101,6 +129,7 @@ class TherapistController extends Controller
 
         return view('therapist', compact(
             'incomingAssignments',
+            'chatAssignments',
             'calendarAssignments',
             'calendarDays',
             'currentMonth',

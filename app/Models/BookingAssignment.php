@@ -31,4 +31,9 @@ class BookingAssignment extends Model
     {
         return $this->belongsTo(User::class, 'therapist_id');
     }
+
+    public function chat()
+    {
+        return $this->hasOne(Chat::class, 'booking_assignment_id');
+    }
 }
